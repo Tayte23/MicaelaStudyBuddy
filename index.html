@@ -52,7 +52,7 @@
       50%{opacity:.9; transform:translateY(-6px)}
     }
 
-    .wrap{max-width:1100px; margin:0 auto; padding:22px 16px 60px}
+    .wrap{max-width:1100px; margin:0 auto; padding:22px 16px 60px; perspective:1200px;}
 
     header{
       padding:18px 18px 8px;
@@ -116,11 +116,28 @@
       color:var(--ink);
       cursor:pointer;
       border:1px solid var(--stroke);
-      box-shadow: var(--shadow2);
-      transition: transform .08s ease, filter .15s ease;
+      /* 3D button: "raised" + inner sheen */
+      box-shadow: 0 10px 0 rgba(26,18,48,.10), var(--shadow2);
+      transform: translateY(0);
+      transition: transform .08s ease, filter .15s ease, box-shadow .12s ease;
+      position:relative;
+      overflow:hidden;
+      will-change: transform;
     }
-    button:hover{filter:brightness(1.03)}
-    button:active{transform: translateY(1px)}
+    button:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(220px 120px at 20% 10%, rgba(255,255,255,.55), transparent 60%);
+      opacity:.75;
+      pointer-events:none;
+      mix-blend-mode: screen;
+    }
+    button:hover{filter:brightness(1.04)}
+    button:active{
+      transform: translateY(4px);
+      box-shadow: 0 6px 0 rgba(26,18,48,.10), var(--shadow2);
+    }
 
     .btn-primary{background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.78));}
     .btn-danger{background: linear-gradient(135deg, rgba(255,232,236,.95), rgba(255,255,255,.72));}
@@ -136,7 +153,12 @@
       overflow:hidden;
       position:relative;
       transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform .14s ease, filter .18s ease;
+      --mx:50%;
+      --my:28%;
     }
+    .panel:hover{filter:brightness(1.02)}
     .panel:before{
       content:"";
       position:absolute;
@@ -144,6 +166,20 @@
       background: radial-gradient(700px 340px at 12% 0%, rgba(255,255,255,.55), transparent 60%);
       opacity:.55;
       pointer-events:none;
+    }
+    .panel:after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: inherit;
+      pointer-events:none;
+      background:
+        radial-gradient(520px 260px at var(--mx) var(--my), rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(820px 420px at 90% 18%, rgba(0,229,255,.10), transparent 60%),
+        radial-gradient(900px 420px at 18% 0%, rgba(255,79,216,.10), transparent 55%);
+      mix-blend-mode: screen;
+      opacity:.70;
+      transform: translateZ(24px);
     }
 
     .tabs{
@@ -287,7 +323,20 @@
       opacity:.55;
       pointer-events:none;
     }
-    .card:hover{transform: translateY(-2px) scale(1.005); filter: brightness(1.02);}
+    .card:after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: 18px;
+      pointer-events:none;
+      background:
+        radial-gradient(420px 220px at var(--mx, 50%) var(--my, 30%), rgba(255,255,255,.50), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.18), transparent 55%);
+      opacity:.55;
+      mix-blend-mode: screen;
+      transform: translateZ(18px);
+    }
+    .card:hover{transform: translateY(-3px) scale(1.01); filter: brightness(1.03);}
     @media (min-width: 720px){ .card{grid-column: span 6;} }
     @media (min-width: 980px){ .card{grid-column: span 4;} }
 
@@ -413,6 +462,22 @@
       backdrop-filter: blur(14px);
       overflow:hidden;
       display:none;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform .14s ease, filter .18s ease;
+      --mx:50%;
+      --my:28%;
+    }
+    .tutorPanel:after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: inherit;
+      pointer-events:none;
+      background: radial-gradient(560px 320px at var(--mx) var(--my), rgba(255,255,255,.55), transparent 62%);
+      opacity:.65;
+      mix-blend-mode: screen;
+      transform: translateZ(26px);
     }
     .tutorPanel.open{display:flex; flex-direction:column;}
 
@@ -1507,6 +1572,47 @@ function simpleStepsVisual(steps){
     ${steps.map((s,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:900;">${i+1}. ${s}</div>`).join("")}
   </div>`;
 }
+
+// ===== 4D Tilt / Parallax (no libraries) =====
+(function enable4DTilt(){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+
+  function attach(el, max=10){
+    if(!el) return;
+    el.addEventListener('mousemove', (e)=>{
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (py - 0.5) * -2 * max; // invert for natural tilt
+      const ry = (px - 0.5) *  2 * max;
+      el.style.transform = `perspective(1200px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-1px)`;
+      el.style.setProperty('--mx', `${(px*100).toFixed(1)}%`);
+      el.style.setProperty('--my', `${(py*100).toFixed(1)}%`);
+    });
+    el.addEventListener('mouseleave', ()=>{
+      el.style.transform = '';
+      el.style.setProperty('--mx','50%');
+      el.style.setProperty('--my','28%');
+    });
+  }
+
+  // Big surfaces
+  attach(document.querySelector('header'), 7);
+  document.querySelectorAll('.panel').forEach(p=>attach(p, 8));
+  attach(document.getElementById('tutorPanel'), 9);
+
+  // Cards (lighter tilt)
+  const attachCards = () => document.querySelectorAll('.card').forEach(c=>attach(c, 5));
+  attachCards();
+
+  // Re-attach after rerender (cards are recreated)
+  const _render = render;
+  window.render = function(){
+    _render();
+    attachCards();
+  };
+})();
 
 // ===== Self-tests (run in console) =====
 function assert(condition, message){
