@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>✨ Micaela’s KS2 Power Checklist ✨</title>
+  <style>
+    :root{
+      --bg1:#ff4fd8;
+      --bg2:#7b61ff;
+      --bg3:#00e5ff;
+      --ink:#1a1230;
+      --card: rgba(255,255,255,.78);
+      --card2: rgba(255,255,255,.62);
+      --stroke: rgba(26,18,48,.12);
+      --shadow: 0 14px 40px rgba(18,10,40,.22);
+      --shadow2: 0 10px 24px rgba(18,10,40,.18);
+      --radius: 22px;
+      --radius2: 16px;
+      --good:#1bd96a;
+      --warn:#ffb020;
+      --bad:#ff4a5e;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(255,255,255,.18), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* sparkle overlay */
+    .sparkles{
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.65), transparent 60%),
+        radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(1.5px 1.5px at 70% 30%, rgba(255,255,255,.50), transparent 60%),
+        radial-gradient(1.8px 1.8px at 85% 80%, rgba(255,255,255,.60), transparent 60%),
+        radial-gradient(1.2px 1.2px at 25% 85%, rgba(255,255,255,.55), transparent 60%);
+      opacity:.75;
+      animation: twinkle 5.5s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+    @keyframes twinkle{
+      0%,100%{opacity:.55; transform:translateY(0)}
+      50%{opacity:.9; transform:translateY(-6px)}
+    }
+
+    .wrap{max-width:1100px; margin:0 auto; padding:22px 16px 60px}
+    header{
+      padding:18px 18px 8px;
+      border-radius: calc(var(--radius) + 8px);
+      background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.52));
+      box-shadow: var(--shadow);
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+    }
+
+    .topline{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .brand h1{
+      margin:0;
+      font-size: clamp(20px, 3.6vw, 36px);
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .brand p{margin:6px 0 0; opacity:.9}
+    .pillrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+    .pill{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      border:1px solid var(--stroke);
+      box-shadow: var(--shadow2);
+    }
+    .money{
+      font-weight:800;
+      font-size: 18px;
+    }
+    .tiny{font-size:12px; opacity:.8}
+
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    button{
+      border:0;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:700;
+      background: rgba(255,255,255,.84);
+      color:var(--ink);
+      cursor:pointer;
+      border:1px solid var(--stroke);
+      box-shadow: var(--shadow2);
+      transition: transform .08s ease, filter .15s ease;
+    }
+    button:hover{filter:brightness(1.03)}
+    button:active{transform: translateY(1px)}
+    .btn-primary{
+      background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.78));
+    }
+    .btn-danger{
+      background: linear-gradient(135deg, rgba(255,232,236,.95), rgba(255,255,255,.72));
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,.70), rgba(255,255,255,.50));
+      border:1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      padding:14px;
+      border-bottom:1px solid rgba(26,18,48,.10);
+      flex-wrap:wrap;
+    }
+    .tab{
+      flex: 1 1 160px;
+      text-align:center;
+      padding:12px 14px;
+      border-radius: 16px;
+      cursor:pointer;
+      font-weight:800;
+      border: 1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.72);
+      transition: transform .08s ease, filter .15s ease;
+      user-select:none;
+    }
+    .tab:hover{filter:brightness(1.03)}
+    .tab.active{
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.70));
+      transform: translateY(-1px);
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      padding:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+    .search{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      flex:1 1 340px;
+    }
+    input[type="search"]{
+      width:min(520px, 100%);
+      border-radius: 16px;
+      padding:12px 14px;
+      border:1px solid rgba(26,18,48,.12);
+      outline:none;
+      background: rgba(255,255,255,.85);
+      font-weight:650;
+    }
+
+    .progressWrap{
+      flex: 1 1 260px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .bar{
+      width:min(360px, 100%);
+      height:12px;
+      border-radius:999px;
+      background: rgba(26,18,48,.10);
+      overflow:hidden;
+      border:1px solid rgba(26,18,48,.10);
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, #00ffcc, #7b61ff, #ff4fd8);
+      transition: width .25s ease;
+    }
+    .pct{font-weight:900}
+
+    .sections{padding: 0 14px 14px}
+    details.section{
+      border:1px solid rgba(26,18,48,.10);
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.62);
+      margin-bottom: 12px;
+      overflow:hidden;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:900;
+    }
+    summary::-webkit-details-marker{display:none}
+    .sectionMeta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      font-weight:800;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border:1px solid rgba(26,18,48,.10);
+      font-size:12px;
+    }
+    .cards{
+      padding: 10px 12px 14px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:10px;
+    }
+    .card{
+      grid-column: span 12;
+      border-radius: 18px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(26,18,48,.10);
+      box-shadow: 0 10px 20px rgba(18,10,40,.10);
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    @media (min-width: 720px){
+      .card{grid-column: span 6;}
+    }
+    @media (min-width: 980px){
+      .card{grid-column: span 4;}
+    }
+
+    .row1{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .topic{
+      font-weight:950;
+      line-height:1.2;
+    }
+    .code{
+      font-size:12px;
+      opacity:.8;
+      font-weight:800;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border:1px dashed rgba(26,18,48,.20);
+      background: rgba(255,255,255,.55);
+      white-space:nowrap;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+
+    .conf{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .conf label{
+      font-size:12px;
+      font-weight:900;
+      opacity:.85;
+    }
+    select{
+      border-radius: 14px;
+      padding:10px 10px;
+      border:1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.9);
+      font-weight:800;
+      outline:none;
+    }
+    .checks{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      font-weight:800;
+    }
+    .checks label{
+      display:flex; gap:8px; align-items:center;
+      background: rgba(255,255,255,.72);
+      border:1px solid rgba(26,18,48,.10);
+      border-radius: 999px;
+      padding:8px 10px;
+      user-select:none;
+    }
+    input[type="checkbox"]{width:18px; height:18px}
+
+    .earnedRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      font-weight:900;
+    }
+    .earned{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .tagEarned{
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(26,18,48,.10);
+      background: rgba(255,255,255,.85);
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .note{
+      padding: 0 14px 14px;
+      font-size: 12px;
+      opacity:.85;
+      line-height:1.4;
+    }
+
+    .footer{
+      margin-top:12px;
+      padding:14px 18px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.58);
+      border:1px solid rgba(26,18,48,.10);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(10px);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-weight:800;
+      background: rgba(255,255,255,.8);
+      border:1px solid rgba(26,18,48,.12);
+      border-radius: 8px;
+      padding:2px 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sparkles" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="topline">
+        <div class="brand">
+          <h1>✨ Micaela’s KS2 Power Checklist ✨</h1>
+          <p>Pink, sparkly, and super clear — tick topics, set confidence, and earn rewards 💖</p>
+        </div>
+
+        <div class="pillrow">
+          <div class="pill" title="Total money earned from completed work">
+            <div>💰</div>
+            <div>
+              <div class="tiny">Total earned</div>
+              <div class="money" id="totalMoney">£0.00</div>
+            </div>
+          </div>
+          <div class="pill" title="Topics completed (practice + test)">
+            <div>✅</div>
+            <div>
+              <div class="tiny">Topics completed</div>
+              <div class="money" id="topicsDone">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="exportBtn">Export progress</button>
+          <button class="btn-primary" id="importBtn">Import progress</button>
+          <button class="btn-danger" id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="tabs">
+          <div class="tab active" data-tab="maths">📘 Maths</div>
+          <div class="tab" data-tab="english">📗 English</div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search">
+            <input id="searchBox" type="search" placeholder="Search topics… e.g. fractions, commas, inference" />
+            <button id="clearSearchBtn">Clear</button>
+          </div>
+
+          <div class="progressWrap">
+            <div class="bar" aria-label="Overall progress">
+              <div id="progressFill"></div>
+            </div>
+            <div class="pct" id="progressPct">0%</div>
+          </div>
+        </div>
+
+        <div class="sections" id="content"></div>
+
+        <div class="note">
+          Reward rules are editable in the code (look for <span class="kbd">REWARD</span>). Everything saves automatically on this device.
+        </div>
+      </div>
+
+      <div class="footer">
+        <strong>How money works (default):</strong>
+        <ul>
+          <li>Practice done = <strong>£0.50</strong></li>
+          <li>Test passed = <strong>£0.50</strong></li>
+          <li>Confidence “😄 Very confident” bonus = <strong>£0.25</strong></li>
+          <li>Topic fully completed (practice + test) bonus = <strong>£0.25</strong></li>
+        </ul>
+        Max per topic = <strong>£1.50</strong>. You can change this anytime.
+      </div>
+    </div>
+  </div>
+
+<script>
+/**
+ * Topics are based on the KS2 SAT IXL skill-plan lists you attached.
+ * (You can add/remove topics freely.)
+ */
+
+// ====== REWARD SETTINGS (edit these if you want) ======
+const REWARD = {
+  practice: 0.50,
+  test: 0.50,
+  confidentBonus: 0.25,       // when confidence is 😄
+  completeBonus: 0.25         // when practice + test are both checked
+};
+
+// ====== Confidence Options ======
+const CONF_OPTIONS = [
+  { value: "not", label: "😟 Not confident" },
+  { value: "some", label: "🙂 Getting there" },
+  { value: "yes", label: "😄 Very confident" }
+];
+
+// ====== DATA (Maths + English) ======
+const DATA = {
+  maths: [
+    {
+      section: "Number & Place Value",
+      items: [
+        { id:"m_N1", topic:"Counting in multiples (input/output tables)", code:"N1 • 6V2" },
+        { id:"m_N2", topic:"Ten more or less / compare & order numbers to 10 million", code:"N2 • BYZ/9MH" },
+        { id:"m_N2b", topic:"Write numbers up to 10 million in words", code:"N2 • 84X" },
+        { id:"m_N3", topic:"Expanded form & Roman numerals", code:"N3 • ATH/BAK" },
+        { id:"m_N4", topic:"Rounding (up to millions place)", code:"N4 • X65" },
+        { id:"m_N5", topic:"Negative numbers (integers)", code:"N5 • 7SS" },
+        { id:"m_N6", topic:"Place value word problems", code:"N6 • DGS" }
+      ]
+    },
+    {
+      section: "Calculations (Add/Subtract/Multiply/Divide)",
+      items: [
+        { id:"m_C1", topic:"Mental add/subtract with zeros", code:"C1 • YCD" },
+        { id:"m_C2a", topic:"Add numbers up to six digits", code:"C2 • KNF" },
+        { id:"m_C2b", topic:"Subtract numbers up to six digits", code:"C2 • FHZ" },
+        { id:"m_C3", topic:"Estimate & check answers (reasonable answers)", code:"C3 • 49F" },
+        { id:"m_C4", topic:"Multi-step add/subtract word problems", code:"C4 • 6NM" },
+        { id:"m_C5", topic:"Factors, multiples, primes (incl HCF/LCM)", code:"C5 • Q9A/74F/WNB" },
+        { id:"m_C6", topic:"Multiply/divide mentally with zeros", code:"C6 • 9BT" },
+        { id:"m_C7a", topic:"Multiply 2-digit by 3/4-digit", code:"C7 • 5G6" },
+        { id:"m_C7b", topic:"Divide 4-digit by 2-digit (and word problems)", code:"C7 • BY7/48X" },
+        { id:"m_C8", topic:"Multi-step problems using all operations", code:"C8 • JFJ" },
+        { id:"m_C9", topic:"Order of operations (brackets/square brackets)", code:"C9 • 9PZ" }
+      ]
+    },
+    {
+      section: "Fractions, Decimals & Percentages",
+      items: [
+        { id:"m_F2", topic:"Equivalent fractions & simplest form", code:"F2 • MP2/FXV" },
+        { id:"m_F3", topic:"Compare & order fractions", code:"F3 • BF9" },
+        { id:"m_F4", topic:"Add/subtract fractions with different denominators", code:"F4 • UW7" },
+        { id:"m_F5", topic:"Multiply fractions / divide fractions by whole numbers", code:"F5 • YB2/A2R" },
+        { id:"m_F6", topic:"Convert fractions to decimals", code:"F6 • 4K2" },
+        { id:"m_F7", topic:"Round decimals", code:"F7 • LXK" },
+        { id:"m_F8", topic:"Compare & order decimals to thousandths", code:"F8 • U6K/ASD" },
+        { id:"m_F9", topic:"Multiply/divide decimals (10/100/1000 etc.)", code:"F9 • WJ8/PZB/CNS/9DZ" },
+        { id:"m_F10", topic:"Decimal word problems & rounding", code:"F10 • YTU/LKL" },
+        { id:"m_F11", topic:"Convert between percents, fractions & decimals (word problems)", code:"F11 • TND" },
+        { id:"m_F12", topic:"Percentage problems & comparisons", code:"F12 • CGZ/FHN" }
+      ]
+    },
+    {
+      section: "Ratio, Proportion & Algebra",
+      items: [
+        { id:"m_R1", topic:"Ratios and rates word problems", code:"R1 • EKA" },
+        { id:"m_R2", topic:"Percent of a number & comparing percents", code:"R2 • QLE/49P" },
+        { id:"m_R3", topic:"Scale drawings / scale factors word problems", code:"R3 • R99" },
+        { id:"m_R4", topic:"Fractions of a number & multiplicative comparison", code:"R4 • APR/ZML" },
+        { id:"m_A1", topic:"One-step equations from diagrams", code:"A1 • Z7D" },
+        { id:"m_A2", topic:"Write variable expressions (word problems)", code:"A2 • ZU2" },
+        { id:"m_A3", topic:"Number sequences (use a rule)", code:"A3 • PWX" },
+        { id:"m_A4", topic:"Does (x, y) satisfy an equation?", code:"A4 • UHF" },
+        { id:"m_A5", topic:"Two-variable tables / relationships", code:"A5 • BKG" }
+      ]
+    },
+    {
+      section: "Measurement",
+      items: [
+        { id:"m_M5", topic:"Convert metric units", code:"M5 • XHY" },
+        { id:"m_M2", topic:"Measure using a ruler & choose appropriate units", code:"M2 • EWK/MKW/Z6G/D98" },
+        { id:"m_M3", topic:"Money (count coins/notes)", code:"M3 • XZZ" },
+        { id:"m_M4", topic:"Time conversions + start/end time problems", code:"M4 • 6BE/NWK" },
+        { id:"m_M6", topic:"Convert miles and kilometres", code:"M6 • EMG" },
+        { id:"m_M7", topic:"Area & perimeter (incl triangles/parallelograms)", code:"M7 • SCN/9GQ" },
+        { id:"m_M8", topic:"Volume of cubes/cuboids", code:"M8 • M7H" },
+        { id:"m_M9", topic:"Multi-step measurement conversion problems", code:"M9 • MDK" }
+      ]
+    },
+    {
+      section: "Geometry & Statistics",
+      items: [
+        { id:"m_G1", topic:"Properties of polygons", code:"G1 • ZQC" },
+        { id:"m_G2", topic:"Classify triangles and quadrilaterals", code:"G2 • BT2/MJ2" },
+        { id:"m_G3", topic:"Draw quadrilaterals & 3D nets", code:"G3 • BMN/LB8" },
+        { id:"m_G4", topic:"Measure/draw angles + missing angles", code:"G4 • X8P/L2F/VLL/59J" },
+        { id:"m_G5", topic:"Parts of a circle", code:"G5 • PGE" },
+        { id:"m_P2", topic:"Translations & reflections on grids", code:"P2 • U6P/YR8" },
+        { id:"m_P3", topic:"Coordinate plane & quadrants", code:"P3 • B45/MZM" },
+        { id:"m_S1", topic:"Interpret pie charts & create line graphs", code:"S1 • DDW/YJT" },
+        { id:"m_S2", topic:"Interpret pictograms/bar/line graphs (multi-step)", code:"S2 • KZS/9AG/JUJ" },
+        { id:"m_S3", topic:"Mean average from charts", code:"S3 • 7DZ" }
+      ]
+    }
+  ],
+
+  english: [
+    {
+      section: "Reading (SATs skills)",
+      items: [
+        { id:"e_2a", topic:"Meaning of words in context", code:"2a • LZY" },
+        { id:"e_2b_lit", topic:"Retrieve/record key details (literary texts)", code:"2b • XXT/S9R" },
+        { id:"e_2b_info", topic:"Retrieve/record key details (informational texts)", code:"2b • J88/GNY" },
+        { id:"e_2c", topic:"Summarise main ideas & order events", code:"2c • UHG/YL5" },
+        { id:"e_2d", topic:"Inferences + evidence (supporting details)", code:"2d • 2ZT/S6H/7YR/AVC" },
+        { id:"e_2e", topic:"Predict what might happen (stated + implied)", code:"2e • 77K" },
+        { id:"e_2f", topic:"Text structure (story elements/cause-effect/problem-solution)", code:"2f • 4Q6/7EF/GWK/DR5/Q9H" },
+        { id:"e_2g", topic:"Word choice & meaning (connotation/sensory/figurative language)", code:"2g • QT6/FKF/TNH/2NX" },
+        { id:"e_2h", topic:"Compare within a text (viewpoints/characters/info)", code:"2h • 29Q/ZK9/UYK" }
+      ]
+    },
+    {
+      section: "Grammar: Word Classes",
+      items: [
+        { id:"g_nouns", topic:"Nouns (incl abstract, possessives)", code:"G1.1 • 8XL/EXU/NH9" },
+        { id:"g_verbs", topic:"Verbs (action, helping, modal meaning)", code:"G1.2 • PLX/Y78/5QD" },
+        { id:"g_adj", topic:"Adjectives (identify + compare)", code:"G1.3 • YJ5/ANG" },
+        { id:"g_conj", topic:"Conjunctions (coordinating/subordinating)", code:"G1.4 • 6ES/Q83" },
+        { id:"g_pron", topic:"Pronouns (subject/object)", code:"G1.5 • M67/QD8" },
+        { id:"g_adv", topic:"Adverbs (identify + compare)", code:"G1.6 • CWX/BVY" },
+        { id:"g_prep", topic:"Prepositions", code:"G1.7 • 7C7" },
+        { id:"g_det", topic:"Determiners (articles)", code:"G1.8 • M5L" },
+        { id:"g_subobj", topic:"Subject and object (complete subject)", code:"G1.9 • ZWS" }
+      ]
+    },
+    {
+      section: "Sentence Types & Clauses",
+      items: [
+        { id:"g_senttypes", topic:"Statements/questions/commands/exclamations", code:"G2 • PWA" },
+        { id:"g_clauses", topic:"Dependent vs independent clauses", code:"G3.1 • YDH" },
+        { id:"g_nounphr", topic:"Noun phrases (adjective order, more/most)", code:"G3.2 • BRZ/SL8" },
+        { id:"g_coord", topic:"Co-ordinating conjunctions (use correctly)", code:"G3.3 • CPS" },
+        { id:"g_subord", topic:"Subordinating conjunctions + subordinate clauses", code:"G3.4 • FZC" }
+      ]
+    },
+    {
+      section: "Tense & Consistency",
+      items: [
+        { id:"g_tense", topic:"Tense consistency (fix tense shifts)", code:"G4.2 • 9MP" }
+      ]
+    },
+    {
+      section: "Punctuation",
+      items: [
+        { id:"p_caps", topic:"Capital letters (fix capitalisation)", code:"G5.1 • H7T" },
+        { id:"p_endmarks", topic:"Full stops, question marks, exclamation marks", code:"G5.2–5.4 • PWA" },
+        { id:"p_quotes", topic:"Inverted commas (titles/formatting)", code:"G5.7 • RJZ" },
+        { id:"p_apost", topic:"Apostrophes: contractions + possessives", code:"G5.8 • SK5/9ME/SP7" },
+        { id:"p_dashes", topic:"Dashes", code:"G5.12 • URX" }
+      ]
+    },
+    {
+      section: "Vocabulary & Spelling",
+      items: [
+        { id:"v_syn", topic:"Synonyms & antonyms in context", code:"G6.1 • WVB/2TL" },
+        { id:"v_pref", topic:"Prefixes (re-, mis-, un-/dis-/in-/im-/non-)", code:"G6.2 • KUW/UMV/A5X" },
+        { id:"v_suf", topic:"Suffixes (-ful, -less) + plurals review", code:"G6.3 • 32W/9ML/FKY" },
+        { id:"v_roots", topic:"Word families (Greek/Latin roots)", code:"G6.4 • 9Z5/8A6" },
+        { id:"s_excepts", topic:"Common exception words (patterns like -ild/-ind etc.)", code:"S37 • A9C" },
+        { id:"s_diph", topic:"Diphthongs (oi/oy/ou/ow)", code:"S40 • LT9" },
+        { id:"s_digraph", topic:"Digraphs (ch/sh/th)", code:"S48–49 • LN7" },
+        { id:"s_silent", topic:"Silent letters", code:"S60 • FYB" },
+        { id:"s_homo", topic:"Homophones", code:"S61 • 7QU" }
+      ]
+    }
+  ]
+};
+
+// ====== Storage ======
+const STORAGE_KEY = "micaela_ks2_checklist_v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {};
+    return JSON.parse(raw);
+  }catch(e){
+    return {};
+  }
+}
+function saveState(state){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+// state structure: { [topicId]: { conf, practice, test } }
+
+function getTopicState(id){
+  return state[id] || { conf:"some", practice:false, test:false };
+}
+function setTopicState(id, patch){
+  state[id] = { ...getTopicState(id), ...patch };
+  saveState(state);
+  updateStatsAndProgress();
+}
+
+function calcEarnedForTopic(ts){
+  let money = 0;
+  if(ts.practice) money += REWARD.practice;
+  if(ts.test) money += REWARD.test;
+  if(ts.conf === "yes") money += REWARD.confidentBonus;
+  if(ts.practice && ts.test) money += REWARD.completeBonus;
+  return money;
+}
+
+function isTopicComplete(ts){
+  // completion = practice + test both ticked
+  return Boolean(ts.practice && ts.test);
+}
+
+// ====== UI Rendering ======
+const contentEl = document.getElementById("content");
+const tabs = Array.from(document.querySelectorAll(".tab"));
+const searchBox = document.getElementById("searchBox");
+const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+let activeTab = "maths";
+let searchText = "";
+
+tabs.forEach(t => t.addEventListener("click", () => {
+  tabs.forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  activeTab = t.dataset.tab;
+  render();
+}));
+
+searchBox.addEventListener("input", (e) => {
+  searchText = (e.target.value || "").trim().toLowerCase();
+  render();
+});
+clearSearchBtn.addEventListener("click", () => {
+  searchText = "";
+  searchBox.value = "";
+  render();
+});
+
+function render(){
+  const sections = DATA[activeTab];
+
+  contentEl.innerHTML = "";
+  sections.forEach(sec => {
+    const filteredItems = sec.items.filter(it => {
+      if(!searchText) return true;
+      const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
+      return hay.includes(searchText);
+    });
+
+    if(filteredItems.length === 0) return;
+
+    const details = document.createElement("details");
+    details.className = "section";
+    details.open = !searchText; // open by default when not searching
+
+    const summary = document.createElement("summary");
+
+    const left = document.createElement("div");
+    left.textContent = sec.section;
+
+    const meta = document.createElement("div");
+    meta.className = "sectionMeta";
+
+    const secStats = getSectionStats(filteredItems);
+    const b1 = badge(`💰 £${secStats.money.toFixed(2)}`);
+    const b2 = badge(`✅ ${secStats.done}/${filteredItems.length}`);
+    meta.appendChild(b1);
+    meta.appendChild(b2);
+
+    summary.appendChild(left);
+    summary.appendChild(meta);
+
+    const cards = document.createElement("div");
+    cards.className = "cards";
+
+    filteredItems.forEach(it => cards.appendChild(renderCard(it)));
+
+    details.appendChild(summary);
+    details.appendChild(cards);
+    contentEl.appendChild(details);
+  });
+
+  updateStatsAndProgress();
+}
+
+function badge(text){
+  const span = document.createElement("span");
+  span.className = "badge";
+  span.textContent = text;
+  return span;
+}
+
+function renderCard(item){
+  const ts = getTopicState(item.id);
+
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const row1 = document.createElement("div");
+  row1.className = "row1";
+
+  const topic = document.createElement("div");
+  topic.className = "topic";
+  topic.textContent = item.topic;
+
+  const code = document.createElement("div");
+  code.className = "code";
+  code.textContent = item.code || "";
+
+  row1.appendChild(topic);
+  row1.appendChild(code);
+
+  const controls = document.createElement("div");
+  controls.className = "controls";
+
+  // confidence
+  const confWrap = document.createElement("div");
+  confWrap.className = "conf";
+  const confLabel = document.createElement("label");
+  confLabel.textContent = "Confidence:";
+  const sel = document.createElement("select");
+  CONF_OPTIONS.forEach(opt => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    sel.appendChild(o);
+  });
+  sel.value = ts.conf;
+  sel.addEventListener("change", () => setTopicState(item.id, { conf: sel.value }));
+
+  confWrap.appendChild(confLabel);
+  confWrap.appendChild(sel);
+
+  // checkboxes
+  const checks = document.createElement("div");
+  checks.className = "checks";
+
+  const practiceLbl = checkboxPill("Practice done", ts.practice, (val) => setTopicState(item.id, { practice: val }));
+  const testLbl = checkboxPill("Test passed", ts.test, (val) => setTopicState(item.id, { test: val }));
+
+  checks.appendChild(practiceLbl);
+  checks.appendChild(testLbl);
+
+  controls.appendChild(confWrap);
+  controls.appendChild(checks);
+
+  const earnedRow = document.createElement("div");
+  earnedRow.className = "earnedRow";
+
+  const earned = document.createElement("div");
+  earned.className = "earned";
+
+  const earnedAmt = calcEarnedForTopic(ts);
+  const done = isTopicComplete(ts);
+
+  const tag1 = document.createElement("span");
+  tag1.className = "tagEarned";
+  tag1.textContent = `💸 Earned: £${earnedAmt.toFixed(2)}`;
+
+  const tag2 = document.createElement("span");
+  tag2.className = "tagEarned";
+  tag2.textContent = done ? "🌟 Completed!" : "⏳ In progress";
+
+  earned.appendChild(tag1);
+  earned.appendChild(tag2);
+
+  earnedRow.appendChild(earned);
+
+  card.appendChild(row1);
+  card.appendChild(controls);
+  card.appendChild(earnedRow);
+
+  return card;
+}
+
+function checkboxPill(text, checked, onChange){
+  const lbl = document.createElement("label");
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.checked = checked;
+  cb.addEventListener("change", () => onChange(cb.checked));
+  const span = document.createElement("span");
+  span.textContent = text;
+  lbl.appendChild(cb);
+  lbl.appendChild(span);
+  return lbl;
+}
+
+function getAllTopics(){
+  const all = [];
+  Object.keys(DATA).forEach(k => {
+    DATA[k].forEach(sec => sec.items.forEach(it => all.push(it)));
+  });
+  return all;
+}
+
+function getSectionStats(items){
+  let money = 0;
+  let done = 0;
+  items.forEach(it => {
+    const ts = getTopicState(it.id);
+    money += calcEarnedForTopic(ts);
+    if(isTopicComplete(ts)) done += 1;
+  });
+  return { money, done };
+}
+
+function updateStatsAndProgress(){
+  const visibleItems = [];
+  // Only count items in active tab AND matching search filter (so progress reflects what you're viewing)
+  DATA[activeTab].forEach(sec => {
+    sec.items.forEach(it => {
+      if(!searchText) { visibleItems.push(it); return; }
+      const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
+      if(hay.includes(searchText)) visibleItems.push(it);
+    });
+  });
+
+  // totals across ALL topics (both tabs)
+  const all = getAllTopics();
+  let totalMoney = 0;
+  let topicsDone = 0;
+  all.forEach(it => {
+    const ts = getTopicState(it.id);
+    totalMoney += calcEarnedForTopic(ts);
+    if(isTopicComplete(ts)) topicsDone += 1;
+  });
+
+  document.getElementById("totalMoney").textContent = `£${totalMoney.toFixed(2)}`;
+  document.getElementById("topicsDone").textContent = `${topicsDone}`;
+
+  // progress bar = completion of visible list
+  const totalVisible = visibleItems.length || 1;
+  let doneVisible = 0;
+  visibleItems.forEach(it => {
+    const ts = getTopicState(it.id);
+    if(isTopicComplete(ts)) doneVisible += 1;
+  });
+
+  const pct = Math.round((doneVisible / totalVisible) * 100);
+  document.getElementById("progressFill").style.width = `${pct}%`;
+  document.getElementById("progressPct").textContent = `${pct}%`;
+}
+
+// ====== Export / Import / Reset ======
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(!confirm("Reset ALL progress? This will clear ticks, confidence, and money totals.")) return;
+  state = {};
+  saveState(state);
+  render();
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    reward: REWARD,
+    state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "micaela-checklist-progress.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("importBtn").addEventListener("click", async () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if(!file) return;
+    const text = await file.text();
+    try{
+      const parsed = JSON.parse(text);
+      if(!parsed || typeof parsed !== "object" || !parsed.state) throw new Error("Invalid file");
+      state = parsed.state || {};
+      saveState(state);
+      render();
+      alert("Imported! 🎉");
+    }catch(e){
+      alert("Sorry — that file didn’t look like a valid export.");
+    }
+  };
+  input.click();
+});
+
+// initial render
+render();
+</script>
+</body>
+</html>
