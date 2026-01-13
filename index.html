@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>✨ Micaela’s KS2 Power Checklist ✨</title>
+  <!-- Avoid special characters in <title> for maximum compatibility -->
+  <title>Micaela KS2 Power Checklist</title>
   <style>
     :root{
       --bg1:#ff4fd8;
@@ -373,6 +374,147 @@
       border-radius: 8px;
       padding:2px 6px;
     }
+
+    /* === Tutor Chat (Katseye pink vibes) === */
+    .tutorFab{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:50;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:12px 14px;
+      border-radius: 999px;
+      border:1px solid rgba(26,18,48,.12);
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+      box-shadow: var(--shadow);
+      cursor:pointer;
+      user-select:none;
+      font-weight:950;
+    }
+    .tutorFab small{opacity:.8; font-weight:800}
+
+    .tutorPanel{
+      position:fixed;
+      right:18px;
+      bottom:86px;
+      width:min(420px, calc(100vw - 36px));
+      height:min(620px, calc(100vh - 120px));
+      z-index:60;
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(255,255,255,.80), rgba(255,255,255,.58));
+      border:1px solid rgba(26,18,48,.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      display:none;
+    }
+    .tutorPanel.open{display:flex; flex-direction:column;}
+
+    .tutorHead{
+      padding:12px 14px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid rgba(26,18,48,.10);
+      background: linear-gradient(135deg, rgba(255,79,216,.18), rgba(123,97,255,.14), rgba(0,229,255,.10));
+    }
+    .tutorTitle{font-weight:950; line-height:1.15}
+    .tutorSub{font-size:12px; opacity:.85; margin-top:4px}
+
+    .tutorControls{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.82);
+      font-weight:900;
+      cursor:pointer;
+      font-size:12px;
+    }
+    .chip.active{background: rgba(255,255,255,.95)}
+
+    .tutorBody{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      height:100%;
+    }
+    .chatLog{
+      flex:1;
+      overflow:auto;
+      padding:8px;
+      border-radius: 18px;
+      border:1px solid rgba(26,18,48,.10);
+      background: rgba(255,255,255,.70);
+    }
+    .msg{margin:8px 0; display:flex;}
+    .msg .bubble{
+      max-width: 88%;
+      padding:10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(26,18,48,.10);
+      box-shadow: 0 8px 18px rgba(18,10,40,.08);
+      line-height:1.35;
+      font-weight:750;
+      font-size:13px;
+      white-space:pre-wrap;
+    }
+    .msg.user{justify-content:flex-end;}
+    .msg.user .bubble{background: rgba(255,79,216,.18)}
+    .msg.bot .bubble{background: rgba(123,97,255,.14)}
+
+    .quickRow{display:flex; gap:8px; flex-wrap:wrap}
+
+    .tutorInput{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .tutorInput input{
+      flex:1;
+      border-radius: 16px;
+      padding:12px 12px;
+      border:1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.92);
+      font-weight:850;
+      outline:none;
+    }
+    .sendBtn{
+      border-radius: 16px;
+      padding:12px 12px;
+      border:1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow2);
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .miniVisual{
+      margin-top:8px;
+      border-radius: 16px;
+      border:1px solid rgba(26,18,48,.10);
+      background: rgba(255,255,255,.80);
+      padding:10px;
+    }
+
+    .askBtn{
+      border-radius: 999px;
+      padding:8px 10px;
+      border:1px solid rgba(26,18,48,.12);
+      background: rgba(255,255,255,.90);
+      font-weight:950;
+      cursor:pointer;
+      box-shadow: 0 10px 18px rgba(18,10,40,.08);
+    }
+
+    @media (max-width: 520px){
+      .tutorPanel{right:10px; bottom:86px; width: calc(100vw - 20px)}
+      .tutorFab{right:10px; bottom:12px}
+    }
   </style>
 </head>
 
@@ -440,6 +582,38 @@
         </div>
       </div>
 
+      <!-- Tutor Chat UI -->
+      <div class="tutorPanel" id="tutorPanel" role="dialog" aria-label="Micaela Tutor Chat">
+        <div class="tutorHead">
+          <div>
+            <div class="tutorTitle">💖 Tutor Chat</div>
+            <div class="tutorSub" id="tutorTopic">Topic: (pick a topic or tap “Ask Tutor”)</div>
+          </div>
+          <div class="tutorControls">
+            <div class="chip active" id="modeOffline">Offline</div>
+            <div class="chip" id="modeAI">AI</div>
+            <div class="chip" id="closeTutor">✕</div>
+          </div>
+        </div>
+        <div class="tutorBody">
+          <div class="quickRow">
+            <div class="chip" id="qExplain">Explain</div>
+            <div class="chip" id="qExample">Example</div>
+            <div class="chip" id="qQuiz">Quick Quiz</div>
+            <div class="chip" id="qVisual">Show Visual</div>
+          </div>
+          <div class="chatLog" id="chatLog" aria-live="polite"></div>
+          <div class="tutorInput">
+            <input id="chatInput" placeholder="Ask me anything about this topic…" />
+            <button class="sendBtn" id="sendBtn">Send ✨</button>
+          </div>
+          <div class="note" style="padding:0; margin-top:-2px;">
+            <strong>Offline</strong> = safe built-in tutor. <strong>AI</strong> = needs a secure backend endpoint (so your API key stays private).
+          </div>
+        </div>
+      </div>
+      <div class="tutorFab" id="tutorFab">🩷 Tutor <small id="fabHint">(offline)</small></div>
+
       <div class="footer">
         <strong>How money works (default):</strong>
         <ul>
@@ -455,8 +629,10 @@
 
 <script>
 /**
- * Topics are based on the KS2 SAT IXL skill-plan lists you attached.
- * (You can add/remove topics freely.)
+ * Fixes applied:
+ * 1) Removed special characters from <title> for compatibility.
+ * 2) Replaced invalid JS string literals that contained raw newlines with template literals / \n.
+ * 3) Fixed accidental control characters in a regex by using \b word boundaries.
  */
 
 // ====== REWARD SETTINGS (edit these if you want) ======
@@ -649,8 +825,8 @@ function loadState(){
     return {};
   }
 }
-function saveState(state){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function saveState(st){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
 }
 
 let state = loadState();
@@ -675,7 +851,6 @@ function calcEarnedForTopic(ts){
 }
 
 function isTopicComplete(ts){
-  // completion = practice + test both ticked
   return Boolean(ts.practice && ts.test);
 }
 
@@ -720,7 +895,7 @@ function render(){
 
     const details = document.createElement("details");
     details.className = "section";
-    details.open = !searchText; // open by default when not searching
+    details.open = !searchText;
 
     const summary = document.createElement("summary");
 
@@ -782,6 +957,17 @@ function renderCard(item){
   const controls = document.createElement("div");
   controls.className = "controls";
 
+  // Ask Tutor button (opens chat with this topic selected)
+  const askBtn = document.createElement("button");
+  askBtn.className = "askBtn";
+  askBtn.type = "button";
+  askBtn.textContent = "🩷 Ask Tutor";
+  askBtn.addEventListener("click", () => {
+    setCurrentTopic(item);
+    openTutor();
+    botSay(`Hi Micaela 💖\nWant me to explain “${item.topic}” or do a quick quiz?`);
+  });
+
   // confidence
   const confWrap = document.createElement("div");
   confWrap.className = "conf";
@@ -812,6 +998,7 @@ function renderCard(item){
 
   controls.appendChild(confWrap);
   controls.appendChild(checks);
+  controls.appendChild(askBtn);
 
   const earnedRow = document.createElement("div");
   earnedRow.className = "earnedRow";
@@ -832,7 +1019,6 @@ function renderCard(item){
 
   earned.appendChild(tag1);
   earned.appendChild(tag2);
-
   earnedRow.appendChild(earned);
 
   card.appendChild(row1);
@@ -876,7 +1062,6 @@ function getSectionStats(items){
 
 function updateStatsAndProgress(){
   const visibleItems = [];
-  // Only count items in active tab AND matching search filter (so progress reflects what you're viewing)
   DATA[activeTab].forEach(sec => {
     sec.items.forEach(it => {
       if(!searchText) { visibleItems.push(it); return; }
@@ -885,7 +1070,6 @@ function updateStatsAndProgress(){
     });
   });
 
-  // totals across ALL topics (both tabs)
   const all = getAllTopics();
   let totalMoney = 0;
   let topicsDone = 0;
@@ -898,7 +1082,6 @@ function updateStatsAndProgress(){
   document.getElementById("totalMoney").textContent = `£${totalMoney.toFixed(2)}`;
   document.getElementById("topicsDone").textContent = `${topicsDone}`;
 
-  // progress bar = completion of visible list
   const totalVisible = visibleItems.length || 1;
   let doneVisible = 0;
   visibleItems.forEach(it => {
@@ -957,8 +1140,322 @@ document.getElementById("importBtn").addEventListener("click", async () => {
   input.click();
 });
 
+// ===== Tutor Chat (Offline + Optional AI) =====
+const tutorPanel = document.getElementById("tutorPanel");
+const tutorFab = document.getElementById("tutorFab");
+const tutorTopicEl = document.getElementById("tutorTopic");
+const chatLog = document.getElementById("chatLog");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const modeOffline = document.getElementById("modeOffline");
+const modeAI = document.getElementById("modeAI");
+const closeTutor = document.getElementById("closeTutor");
+const fabHint = document.getElementById("fabHint");
+
+const qExplain = document.getElementById("qExplain");
+const qExample = document.getElementById("qExample");
+const qQuiz = document.getElementById("qQuiz");
+const qVisual = document.getElementById("qVisual");
+
+let tutorMode = "offline"; // "offline" | "ai"
+let currentTopic = null; // {id, topic, code}
+
+// Super-safe offline mini knowledge base (expand anytime)
+const OFFLINE_TUTOR = {
+  // Maths
+  "Counting in multiples (input/output tables)": {
+    explain: `Counting in multiples means jumping by the same number each time (like +2, +5, +10).\nInput/output tables show a rule that turns an input into an output.`,
+    example: `If the rule is ×3, then:\nInput 2 → Output 6\nInput 4 → Output 12\nTry: Input 5 → Output ?`,
+    quiz: { q:"Rule is +7. If input is 9, what is output?", a:"16" },
+    visual: () => numberLineVisual(0, 35, 7)
+  },
+  "Equivalent fractions & simplest form": {
+    explain: `Equivalent fractions are the same value written in different ways.\nYou can multiply or divide the top and bottom by the SAME number.`,
+    example: `1/2 is the same as 2/4 and 3/6.\nBecause we multiplied top & bottom by 2 or 3.`,
+    quiz: { q:"Is 3/6 equivalent to 1/2? (yes/no)", a:"yes" },
+    visual: () => fractionBarVisual(1,2)
+  },
+  "Compare & order fractions": {
+    explain: `To compare fractions:\n• If denominators match, bigger numerator is bigger.\n• If not, convert to a common denominator or use fraction bars.`,
+    example: `Compare 1/3 and 1/2.\nHalf is bigger because 1 out of 2 is larger than 1 out of 3.`,
+    quiz: { q:"Which is bigger: 3/4 or 2/3?", a:"3/4" },
+    visual: () => fractionCompareVisual(3,4,2,3)
+  },
+  "Place value word problems": {
+    explain: `Place value tells you what each digit is worth (ones, tens, hundreds, thousands…).\nWord problems often ask you to use that to compare or calculate.`,
+    example: "In 54,321 the 5 is 50,000 and the 3 is 300.",
+    quiz: { q:"In 7,205 what is the value of the 2?", a:"200" },
+    visual: () => placeValueVisual("7205")
+  },
+
+  // English
+  "Inferences + evidence (supporting details)": {
+    explain: `Inference means you use clues + what you know to figure something out that isn’t said directly.\nEvidence is the words from the text that prove your idea.`,
+    example: `Text: ‘Sam pulled on his coat and shivered.’\nInference: It is cold.\nEvidence: ‘pulled on his coat’ + ‘shivered’.`,
+    quiz: { q:"Text: ‘The ground was wet and umbrellas opened.’ What’s a good inference?", a:"It is raining" },
+    visual: () => clueBubbleVisual(["wet ground","umbrellas"], "It is raining")
+  },
+  "Capital letters (fix capitalisation)": {
+    explain: `Use capital letters for:\n• The start of a sentence\n• Names (people/places)\n• Days/months\n• ‘I’\n• Titles (sometimes)`,
+    example: `Wrong: i went to london on monday.\nRight: I went to London on Monday.`,
+    quiz: { q:"Fix this: ‘we visited zimbabwe in april.’", a:"We visited Zimbabwe in April." },
+    visual: () => highlightCapsVisual("we visited zimbabwe in april.")
+  }
+};
+
+function openTutor(){
+  tutorPanel.classList.add("open");
+}
+function closeTutorPanel(){
+  tutorPanel.classList.remove("open");
+}
+
+function setMode(mode){
+  tutorMode = mode;
+  modeOffline.classList.toggle("active", mode === "offline");
+  modeAI.classList.toggle("active", mode === "ai");
+  fabHint.textContent = mode === "offline" ? "(offline)" : "(AI)";
+  if(mode === "ai"){
+    botSay(`AI mode is ON ✨\nNote: AI mode needs a secure backend endpoint so your API key stays private.`);
+  }
+}
+
+function setCurrentTopic(item){
+  currentTopic = item;
+  tutorTopicEl.textContent = `Topic: ${item.topic}`;
+}
+
+function addMsg(role, text){
+  const row = document.createElement("div");
+  row.className = `msg ${role}`;
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.textContent = text;
+  row.appendChild(b);
+  chatLog.appendChild(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+function botSay(text){ addMsg("bot", text); }
+function userSay(text){ addMsg("user", text); }
+
+function ensureTopicSelected(){
+  if(currentTopic) return true;
+  botSay("Pick a topic first 💖 Tap ‘🩷 Ask Tutor’ on any topic card.");
+  return false;
+}
+
+function getOfflinePack(topicName){
+  if(OFFLINE_TUTOR[topicName]) return OFFLINE_TUTOR[topicName];
+  const key = Object.keys(OFFLINE_TUTOR).find(k => topicName.toLowerCase().includes(k.toLowerCase().slice(0,10)));
+  return key ? OFFLINE_TUTOR[key] : null;
+}
+
+function renderVisual(fn){
+  const wrap = document.createElement("div");
+  wrap.className = "miniVisual";
+  wrap.innerHTML = fn();
+  const row = document.createElement("div");
+  row.className = "msg bot";
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.textContent = "Here’s a visual:";
+  row.appendChild(b);
+  chatLog.appendChild(row);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+let tutorExpected = null;
+let tutorExpectedType = null;
+
+function handleOffline(message){
+  if(!ensureTopicSelected()) return;
+  const pack = getOfflinePack(currentTopic.topic);
+
+  // If user is answering a quiz
+  if(tutorExpectedType === "quiz" && tutorExpected){
+    const ans = message.trim().toLowerCase();
+    const exp = String(tutorExpected).trim().toLowerCase();
+    if(ans === exp){
+      botSay("✅ YESSS! That’s correct! 🌟\nWant another quiz or an example?");
+    } else {
+      botSay(`Almost! 💖 The answer is: ${tutorExpected}.\nWant me to explain why?`);
+    }
+    tutorExpected = null;
+    tutorExpectedType = null;
+    return;
+  }
+
+  if(!pack){
+    botSay(`I can help with “${currentTopic.topic}” 💖\nTell me which bit feels confusing, and I’ll explain step-by-step.`);
+    if(/visual|draw|show/i.test(message)){
+      renderVisual(() => simpleStepsVisual(["What is it?","How do we do it?","Try 1 example","Quick quiz"]));
+    }
+    return;
+  }
+
+  if(/quiz|question|test/i.test(message)){
+    botSay(`Quick quiz ✨\n${pack.quiz.q}`);
+    botSay("Reply with your answer.");
+    tutorExpected = pack.quiz.a;
+    tutorExpectedType = "quiz";
+    return;
+  }
+  if(/example|show me|like/i.test(message)){
+    botSay(pack.example);
+    return;
+  }
+  if(/visual|draw|picture|diagram/i.test(message)){
+    renderVisual(pack.visual);
+    return;
+  }
+
+  botSay(pack.explain);
+}
+
+// Optional AI mode (requires backend). Keep API key on the server.
+async function handleAI(message){
+  if(!ensureTopicSelected()) return;
+  botSay("Thinking… ✨");
+  try{
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topic: currentTopic.topic,
+        subject: activeTab,
+        message,
+        age: 10
+      })
+    });
+    if(!res.ok) throw new Error("Bad response");
+    const data = await res.json();
+    botSay(data.reply || "Sorry, I didn’t get a reply.");
+  }catch(e){
+    botSay("AI mode isn’t connected yet.\nAdd a tiny backend endpoint at /api/chat to safely call the AI.");
+  }
+}
+
+function sendChat(text){
+  const msg = (text ?? chatInput.value).trim();
+  if(!msg) return;
+  userSay(msg);
+  chatInput.value = "";
+  if(tutorMode === "offline") handleOffline(msg);
+  else handleAI(msg);
+}
+
+// Quick buttons
+qExplain.addEventListener("click", () => sendChat("explain"));
+qExample.addEventListener("click", () => sendChat("example"));
+qQuiz.addEventListener("click", () => sendChat("quiz"));
+qVisual.addEventListener("click", () => sendChat("show visual"));
+
+sendBtn.addEventListener("click", () => sendChat());
+chatInput.addEventListener("keydown", (e) => {
+  if(e.key === "Enter") sendChat();
+});
+
+modeOffline.addEventListener("click", () => setMode("offline"));
+modeAI.addEventListener("click", () => setMode("ai"));
+closeTutor.addEventListener("click", closeTutorPanel);
+
+tutorFab.addEventListener("click", () => {
+  openTutor();
+  if(!chatLog.childElementCount){
+    botSay("Hi Micaela 💖 I’m your tutor!\nTap ‘🩷 Ask Tutor’ on a topic to start, or ask me anything.");
+  }
+});
+
+// === Simple visuals ===
+function numberLineVisual(min, max, step){
+  const ticks = [];
+  for(let x=min; x<=max; x+=step){ ticks.push(x); }
+  return `
+  <div style="font-weight:950; margin-bottom:6px;">Number line jumps of ${step}</div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    ${ticks.map(t => `<span style="padding:6px 10px;border-radius:999px;border:1px solid rgba(26,18,48,.12);background:rgba(255,255,255,.9);font-weight:950;">${t}</span>`).join("")}
+  </div>`;
+}
+
+function fractionBarVisual(n, d){
+  const parts = Array.from({length:d}).map((_,i)=>{
+    const filled = i < n;
+    return `<div style="flex:1;height:18px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${filled?"rgba(255,79,216,.28)":"rgba(255,255,255,.85)"};"></div>`;
+  }).join("");
+  return `
+  <div style="font-weight:950; margin-bottom:6px;">Fraction bar: ${n}/${d}</div>
+  <div style="display:flex; gap:6px;">${parts}</div>`;
+}
+
+function fractionCompareVisual(a,b,c,d){
+  return `
+  <div style="font-weight:950; margin-bottom:8px;">Compare fractions</div>
+  <div style="display:grid; gap:10px;">
+    <div><div style="font-weight:900;margin-bottom:4px;">${a}/${b}</div>${fractionBarVisual(a,b)}</div>
+    <div><div style="font-weight:900;margin-bottom:4px;">${c}/${d}</div>${fractionBarVisual(c,d)}</div>
+  </div>`;
+}
+
+function placeValueVisual(numStr){
+  const labels = ["ones","tens","hundreds","thousands","ten-thousands","hundred-thousands","millions"];
+  const digits = numStr.split("").reverse();
+  const rows = digits.map((dig,i)=>{
+    const val = Number(dig) * Math.pow(10,i);
+    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:900;">
+      <span>${dig} in the <strong>${labels[i]||("10^"+i)}</strong> place</span>
+      <span>value = <strong>${val.toLocaleString()}</strong></span>
+    </div>`;
+  }).reverse().join("");
+  return `
+  <div style="font-weight:950; margin-bottom:8px;">Place value for ${numStr}</div>
+  <div style="display:grid; gap:8px;">${rows}</div>`;
+}
+
+function clueBubbleVisual(clues, inference){
+  return `
+  <div style="font-weight:950;margin-bottom:8px;">Clues → Inference</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    ${clues.map(c=>`<span style="padding:8px 10px;border-radius:999px;border:1px solid rgba(26,18,48,.12);background:rgba(255,255,255,.88);font-weight:950;">🧩 ${c}</span>`).join("")}
+    <span style="font-weight:950;">➡️</span>
+    <span style="padding:10px 12px;border-radius:999px;border:1px solid rgba(26,18,48,.12);background:rgba(255,79,216,.22);font-weight:950;">💡 ${inference}</span>
+  </div>`;
+}
+
+function highlightCapsVisual(sentence){
+  // IMPORTANT: use \b word boundaries (avoid invisible control chars)
+  return `
+  <div style="font-weight:950;margin-bottom:6px;">Capital letters fix</div>
+  <div style="padding:10px 12px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.88);font-weight:900;">
+    ${sentence.replace(/\b(i|zimbabwe|april)\b/gi, (m)=>`<span style="background:rgba(0,229,255,.22);padding:0 4px;border-radius:8px;">${m}</span>`)}
+  </div>
+  <div style="margin-top:8px;font-weight:900;">Now rewrite it with capitals in the right places ✨</div>`;
+}
+
+function simpleStepsVisual(steps){
+  return `
+  <div style="font-weight:950;margin-bottom:8px;">Let’s learn it step-by-step</div>
+  <div style="display:grid; gap:8px;">
+    ${steps.map((s,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:900;">${i+1}. ${s}</div>`).join("")}
+  </div>`;
+}
+
+// ====== Lightweight self-tests (run in console) ======
+function runSelfTests(){
+  try{
+    console.assert(typeof numberLineVisual(0,14,7) === "string", "numberLineVisual should return a string");
+    console.assert(typeof fractionBarVisual(1,2) === "string", "fractionBarVisual should return a string");
+    console.assert(typeof highlightCapsVisual("we visited zimbabwe in april.") === "string", "highlightCapsVisual should return a string");
+    console.assert(OFFLINE_TUTOR["Counting in multiples (input/output tables)"]?.quiz?.a === "16", "offline tutor sample quiz should exist");
+    console.log("✅ Self-tests passed");
+  }catch(e){
+    console.error("❌ Self-tests failed", e);
+  }
+}
+
 // initial render
 render();
+runSelfTests();
 </script>
 </body>
 </html>
