@@ -182,7 +182,6 @@
       filter: brightness(1.06);
       z-index: 5;
     }
-    .tab:hover{filter:brightness(1.03)}
     .tab.active{
       background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.70));
       transform: translateY(-1px);
@@ -425,7 +424,6 @@
       user-select:none;
       font-weight:950;
     }
-    .tutorFab small{opacity:.8; font-weight:800}
 
     .tutorPanel{
       position:fixed;
@@ -453,10 +451,10 @@
       border-bottom:1px solid rgba(26,18,48,.10);
       background: linear-gradient(135deg, rgba(255,79,216,.18), rgba(123,97,255,.14), rgba(0,229,255,.10));
     }
-    .tutorTitle{font-weight:950; line-height:1.15}
-    .tutorSub{font-size:12px; opacity:.85; margin-top:4px}
+    .tutorTitle{font-weight:950; line-height:1.15;}
+    .tutorSub{font-size:12px; opacity:.85; margin-top:4px;}
 
-    .tutorControls{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+    .tutorControls{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
     .chip{
       padding:8px 10px;
       border-radius:999px;
@@ -467,10 +465,10 @@
       font-size:12px;
       user-select:none;
     }
-    .chip.active{background: rgba(255,255,255,.95)}
+    .chip.active{background: rgba(255,255,255,.95);}
 
     .tutorBody{padding:12px; display:flex; flex-direction:column; gap:10px; flex:1; min-height:0;}
-    .quickRow{display:flex; gap:8px; flex-wrap:wrap}
+    .quickRow{display:flex; gap:8px; flex-wrap:wrap;}
 
     .chatLog{
       flex:1;
@@ -494,8 +492,8 @@
       white-space:pre-wrap;
     }
     .msg.user{justify-content:flex-end;}
-    .msg.user .bubble{background: rgba(255,79,216,.18)}
-    .msg.bot .bubble{background: rgba(123,97,255,.14)}
+    .msg.user .bubble{background: rgba(255,79,216,.18);}
+    .msg.bot .bubble{background: rgba(123,97,255,.14);}
 
     .tutorInput{display:flex; gap:8px; align-items:center;}
     .tutorInput input{
@@ -526,8 +524,8 @@
     }
 
     @media (max-width: 520px){
-      .tutorPanel{right:10px; bottom:86px; width: calc(100vw - 20px)}
-      .tutorFab{right:10px; bottom:12px}
+      .tutorPanel{right:10px; bottom:86px; width: calc(100vw - 20px);}
+      .tutorFab{right:10px; bottom:12px;}
     }
   </style>
 </head>
@@ -596,7 +594,7 @@
         </div>
       </div>
 
-      <!-- Tutor Chat UI -->
+      <!-- Tutor Chat UI (single mode for Micaela) -->
       <div class="tutorPanel" id="tutorPanel" role="dialog" aria-label="Micaela Tutor Chat">
         <div class="tutorHead">
           <div>
@@ -605,8 +603,6 @@
           </div>
           <div class="tutorControls">
             <div class="chip active" id="passSupportive" title="Kind marking: close enough if understanding is clear">A Mode</div>
-            <div class="chip active" id="modeOffline">Offline</div>
-            <div class="chip" id="modeAI">AI</div>
             <div class="chip" id="closeTutor">✕</div>
           </div>
         </div>
@@ -623,7 +619,6 @@
             <input id="chatInput" placeholder="Ask me anything about this topic…" />
             <button class="sendBtn" id="sendBtn">Send ✨</button>
           </div>
-          
         </div>
       </div>
       <div class="tutorFab" id="tutorFab">🩷 Tutor</div>
@@ -641,6 +636,14 @@
   </div>
 
 <script>
+// ================== Small safety helper ==================
+// Prevents crashes if any element is missing (e.g., after UI edits)
+function on(el, event, handler){
+  if(!el) return false;
+  el.addEventListener(event, handler);
+  return true;
+}
+
 // ====== REWARD SETTINGS ======
 const REWARD = {
   verified: 1.25,
@@ -832,20 +835,20 @@ const clearSearchBtn = document.getElementById("clearSearchBtn");
 let activeTab = "maths";
 let searchText = "";
 
-tabs.forEach(t => t.addEventListener("click", () => {
+tabs.forEach(t => on(t, "click", () => {
   tabs.forEach(x => x.classList.remove("active"));
   t.classList.add("active");
   activeTab = t.dataset.tab;
   render();
 }));
 
-searchBox.addEventListener("input", (e) => {
-  searchText = (e.target.value || "").trim().toLowerCase();
+on(searchBox, "input", (e) => {
+  searchText = ((e.target && e.target.value) || "").trim().toLowerCase();
   render();
 });
-clearSearchBtn.addEventListener("click", () => {
+on(clearSearchBtn, "click", () => {
   searchText = "";
-  searchBox.value = "";
+  if(searchBox) searchBox.value = "";
   render();
 });
 
@@ -857,6 +860,7 @@ function badge(text){
 }
 
 function render(){
+  if(!contentEl) return;
   const sections = DATA[activeTab];
   contentEl.innerHTML = "";
 
@@ -902,7 +906,7 @@ function checkboxPill(text, checked, onChange){
   const cb = document.createElement("input");
   cb.type = "checkbox";
   cb.checked = checked;
-  cb.addEventListener("change", () => onChange(cb.checked));
+  on(cb, "change", () => onChange(cb.checked));
   const span = document.createElement("span");
   span.textContent = text;
   lbl.appendChild(cb);
@@ -945,7 +949,7 @@ function renderCard(item){
     sel.appendChild(o);
   });
   sel.value = ts.conf;
-  sel.addEventListener("change", () => setTopicState(item.id, { conf: sel.value }));
+  on(sel, "change", () => setTopicState(item.id, { conf: sel.value }));
   confWrap.appendChild(confLabel);
   confWrap.appendChild(sel);
 
@@ -957,7 +961,7 @@ function renderCard(item){
   askBtn.className = "askBtn";
   askBtn.type = "button";
   askBtn.textContent = activeTab === "maths" ? "🩷 Take Tutor Quiz" : "🩷 Explain-back to Tutor";
-  askBtn.addEventListener("click", () => {
+  on(askBtn, "click", () => {
     setCurrentTopic(item);
     openTutor();
     if(activeTab === "maths"){
@@ -1045,8 +1049,10 @@ function updateStatsAndProgress(){
     if(isUnlocked(it.tab, ts)) topicsDone += 1;
   });
 
-  document.getElementById("totalMoney").textContent = `£${totalMoney.toFixed(2)}`;
-  document.getElementById("topicsDone").textContent = `${topicsDone}`;
+  const totalMoneyEl = document.getElementById("totalMoney");
+  const topicsDoneEl = document.getElementById("topicsDone");
+  if(totalMoneyEl) totalMoneyEl.textContent = `£${totalMoney.toFixed(2)}`;
+  if(topicsDoneEl) topicsDoneEl.textContent = `${topicsDone}`;
 
   // progress bar = unlocked topics (in current view + search)
   const visible = [];
@@ -1064,19 +1070,25 @@ function updateStatsAndProgress(){
   });
 
   const pct = Math.round((doneVisible / totalVisible) * 100);
-  document.getElementById("progressFill").style.width = `${pct}%`;
-  document.getElementById("progressPct").textContent = `${pct}%`;
+  const fill = document.getElementById("progressFill");
+  const pctEl = document.getElementById("progressPct");
+  if(fill) fill.style.width = `${pct}%`;
+  if(pctEl) pctEl.textContent = `${pct}%`;
 }
 
 // ====== Export / Import / Reset ======
-document.getElementById("resetBtn").addEventListener("click", () => {
+const resetBtn = document.getElementById("resetBtn");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+
+on(resetBtn, "click", () => {
   if(!confirm("Reset ALL progress? This will clear practice, confidence, and tutor verification.")) return;
   state = {};
   saveState(state);
   render();
 });
 
-document.getElementById("exportBtn").addEventListener("click", () => {
+on(exportBtn, "click", () => {
   const payload = {
     version: 2,
     exportedAt: new Date().toISOString(),
@@ -1092,7 +1104,7 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-document.getElementById("importBtn").addEventListener("click", async () => {
+on(importBtn, "click", async () => {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "application/json";
@@ -1114,7 +1126,7 @@ document.getElementById("importBtn").addEventListener("click", async () => {
   input.click();
 });
 
-// ===== Tutor Chat (Offline + Optional AI) =====
+// ===== Tutor Chat (offline, single-mode UI) =====
 const tutorPanel = document.getElementById("tutorPanel");
 const tutorFab = document.getElementById("tutorFab");
 const tutorTopicEl = document.getElementById("tutorTopic");
@@ -1122,10 +1134,7 @@ const chatLog = document.getElementById("chatLog");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 const passSupportive = document.getElementById("passSupportive");
-const modeOffline = document.getElementById("modeOffline");
-const modeAI = document.getElementById("modeAI");
 const closeTutor = document.getElementById("closeTutor");
-const fabHint = document.getElementById("fabHint");
 
 const qExplain = document.getElementById("qExplain");
 const qExample = document.getElementById("qExample");
@@ -1133,25 +1142,15 @@ const qQuiz = document.getElementById("qQuiz");
 const qExplainBack = document.getElementById("qExplainBack");
 const qVisual = document.getElementById("qVisual");
 
-let tutorMode = "offline"; // offline | ai
 let passMode = "supportive"; // supportive (A mode)
 let currentTopic = null;   // {id, topic, code}
 
-function openTutor(){ tutorPanel.classList.add("open"); }
-function closeTutorPanel(){ tutorPanel.classList.remove("open"); }
-
-function setMode(mode){
-  tutorMode = mode;
-  modeOffline.classList.toggle("active", mode === "offline");
-  modeAI.classList.toggle("active", mode === "ai");
-  // removed offline/AI hint to avoid confusion
-  
-  if(mode === "ai"){ botSay("AI mode is ON ✨"); }
-}
+function openTutor(){ if(tutorPanel) tutorPanel.classList.add("open"); }
+function closeTutorPanel(){ if(tutorPanel) tutorPanel.classList.remove("open"); }
 
 function setPassMode(next){
   passMode = next;
-  passSupportive.classList.toggle("active", passMode === "supportive");
+  if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
   if(passMode === "supportive"){
     botSay("A Mode ✅\nI will be kind and accept \"close enough\" if your understanding is clear 💖\nI may ask you to add a quick example.");
   }
@@ -1159,10 +1158,11 @@ function setPassMode(next){
 
 function setCurrentTopic(item){
   currentTopic = item;
-  tutorTopicEl.textContent = `Topic: ${item.topic}`;
+  if(tutorTopicEl) tutorTopicEl.textContent = `Topic: ${item.topic}`;
 }
 
 function addMsg(role, text){
+  if(!chatLog) return;
   const row = document.createElement("div");
   row.className = `msg ${role}`;
   const b = document.createElement("div");
@@ -1277,6 +1277,7 @@ function getOfflinePack(topicName){
 }
 
 function renderVisual(fn){
+  if(!chatLog) return;
   const wrap = document.createElement("div");
   wrap.className = "miniVisual";
   wrap.innerHTML = fn();
@@ -1404,57 +1405,30 @@ function handleOffline(message){
   botSay(pack.explain || "Let’s break it down into small steps 💖");
 }
 
-// Optional AI mode (requires backend)
-async function handleAI(message){
-  if(!ensureTopicSelected()) return;
-  botSay("Thinking… ✨");
-  try{
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topic: currentTopic.topic,
-        subject: activeTab,
-        message,
-        age: 10,
-        passMode
-      })
-    });
-    if(!res.ok) throw new Error("Bad response");
-    const data = await res.json();
-    botSay(data.reply || "Sorry, I didn’t get a reply.");
-  }catch(e){
-    botSay("AI mode isn’t connected yet.\nAdd a tiny backend endpoint at /api/chat to safely call the AI.");
-  }
-}
-
 function sendChat(text){
-  const msg = (text ?? chatInput.value).trim();
+  const msg = (text ?? (chatInput ? chatInput.value : "")).trim();
   if(!msg) return;
   userSay(msg);
-  chatInput.value = "";
-  if(tutorMode === "offline") handleOffline(msg);
-  else handleAI(msg);
+  if(chatInput) chatInput.value = "";
+  handleOffline(msg);
 }
 
-// Wire tutor UI
-qExplain.addEventListener("click", () => sendChat("explain"));
-qExample.addEventListener("click", () => sendChat("example"));
-qQuiz.addEventListener("click", () => sendChat("quiz"));
-qExplainBack.addEventListener("click", () => sendChat("explain-back"));
-qVisual.addEventListener("click", () => sendChat("show visual"));
+// Wire tutor UI (safe bindings to avoid null errors)
+on(qExplain, "click", () => sendChat("explain"));
+on(qExample, "click", () => sendChat("example"));
+on(qQuiz, "click", () => sendChat("quiz"));
+on(qExplainBack, "click", () => sendChat("explain-back"));
+on(qVisual, "click", () => sendChat("show visual"));
 
-sendBtn.addEventListener("click", () => sendChat());
-chatInput.addEventListener("keydown", (e) => { if(e.key === "Enter") sendChat(); });
+on(sendBtn, "click", () => sendChat());
+on(chatInput, "keydown", (e) => { if(e.key === "Enter") sendChat(); });
 
-passSupportive.addEventListener("click", () => setPassMode("supportive"));
-modeOffline.addEventListener("click", () => setMode("offline"));
-modeAI.addEventListener("click", () => setMode("ai"));
-closeTutor.addEventListener("click", closeTutorPanel);
+on(passSupportive, "click", () => setPassMode("supportive"));
+on(closeTutor, "click", closeTutorPanel);
 
-tutorFab.addEventListener("click", () => {
+on(tutorFab, "click", () => {
   openTutor();
-  if(!chatLog.childElementCount){
+  if(chatLog && !chatLog.childElementCount){
     botSay("Hi Micaela 💖 I’m your tutor!\nTap ‘Take Tutor Quiz’ (Maths) or ‘Explain-back’ (English) on a topic to unlock rewards.");
   }
 });
@@ -1566,6 +1540,9 @@ function runSelfTests(){
   // 5) Render creates at least one section
   render();
   assert(document.querySelectorAll("details.section").length > 0, "render created at least one section");
+
+  // 6) Binding helper should not throw on null elements
+  assert(on(null, "click", () => {}) === false, "on() returns false for null");
 }
 
 try{
