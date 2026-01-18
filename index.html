@@ -1019,8 +1019,97 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
       }
 
       // ============================
-      // Tutor Chat (OFFLINE ONLY)
+      // Tutor Chat (AI-first + Offline fallback)
       // ============================
+
+      // IMPORTANT:
+      // - AI is ON by default.
+      // - If AI is unreachable, we automatically fall back to OFFLINE_TUTOR.
+      // - If we are in the middle of a verification flow (quiz/explain-back), we keep it offline so we can mark verified.
+
+      // ---- AI backend (Cloudflare Worker) ----
+      // If you ever change your Worker name, update these two URLs.
+      const AI_BACKEND_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/api/chat";
+      const AI_HEALTH_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/health";
+      const AI_MAX_HISTORY = 10; // keep it small to reduce token usage
+      let aiHistory = []; // [{role:"user"|"assistant", content:"..."}]
+      let aiOnline = true;
+      let aiBusy = false;
+
+      function pushAiHistory(role, content){
+        aiHistory.push({ role, content });
+        if(aiHistory.length > AI_MAX_HISTORY) aiHistory = aiHistory.slice(-AI_MAX_HISTORY);
+      }
+
+      function nowISO(){
+        try { return new Date().toISOString(); } catch { return ""; }
+      }
+
+      function buildAiMessage(userText){
+        const topic = currentTopic?.topic ? `Topic: ${currentTopic.topic}` : "Topic: (none selected)";
+        const subject = activeTab || "maths";
+        return `Subject: ${subject}
+${topic}
+
+Learner says: ${userText}`;
+      }
+
+      async function pingAI(){
+        try{
+          const r = await fetch(AI_HEALTH_URL, { method:"GET", cache:"no-store" });
+          aiOnline = r && r.ok;
+        }catch(e){
+          aiOnline = false;
+        }
+        updateTutorStatus();
+        return aiOnline;
+      }
+
+      function updateTutorStatus(){
+        if(!tutorTopicEl) return;
+        const base = currentTopic?.topic ? `Topic: ${currentTopic.topic}` : "Topic: (tap a topic card)";
+        const status = aiBusy ? "🟣 AI: thinking…" : (aiOnline && navigator.onLine ? "🟣 AI: on" : "🔵 Offline: on");
+        tutorTopicEl.textContent = `${base} • ${status}`;
+      }
+
+      function setBusy(isBusy){
+        aiBusy = !!isBusy;
+        updateTutorStatus();
+      }
+
+      async function sendToAI(userText){
+        if(!navigator.onLine) throw new Error("Offline");
+        setBusy(true);
+
+        const payload = {
+          message: buildAiMessage(userText),
+          history: aiHistory,
+          subject: activeTab,
+          mode: "default",
+          ts: nowISO()
+        };
+
+        const res = await fetch(AI_BACKEND_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if(!res.ok){
+          const t = await res.text().catch(()=>"");
+          throw new Error(`AI backend error ${res.status}: ${t.slice(0,240)}`);
+        }
+
+        const data = await res.json().catch(()=> ({}));
+        const reply = (data && data.reply) ? String(data.reply) : "";
+        if(!reply.trim()) throw new Error("Empty AI reply");
+
+        pushAiHistory("user", payload.message);
+        pushAiHistory("assistant", reply);
+
+        aiOnline = true;
+        return reply;
+      }
       const tutorPanel = document.getElementById("tutorPanel");
       const tutorFab = document.getElementById("tutorFab");
       const tutorTopicEl = document.getElementById("tutorTopic");
@@ -1039,7 +1128,13 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
       let passMode = "supportive";
       let currentTopic = null;
 
-      function openTutor(){ if(tutorPanel) tutorPanel.classList.add("open"); }
+      function openTutor(){
+        if(tutorPanel) tutorPanel.classList.add("open");
+        // Refresh status each time tutor opens
+        updateTutorStatus();
+        // Lightweight online check (non-blocking)
+        pingAI();
+      }
       function closeTutorPanel(){ if(tutorPanel) tutorPanel.classList.remove("open"); }
 
       function setPassMode(next){
@@ -1052,7 +1147,7 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
 
       function setCurrentTopic(item){
         currentTopic = item;
-        if(tutorTopicEl) tutorTopicEl.textContent = `Topic: ${item.topic}`;
+        updateTutorStatus();
       }
 
       function addMsg(role, text){
@@ -1286,12 +1381,39 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
         botSay(pack.explain || "Tell me what part feels tricky 💖");
       }
 
-      function sendChat(text){
+      async function sendChat(text){
         const msg = (text ?? (chatInput ? chatInput.value : "")).trim();
         if(!msg) return;
         userSay(msg);
         if(chatInput) chatInput.value = "";
-        handleOffline(msg);
+
+        // If we are currently expecting a local quiz/explain-back answer, keep it OFFLINE so we can mark verified.
+        if(tutorExpectedType){
+          handleOffline(msg);
+          return;
+        }
+
+        // AI-first (default) with automatic offline fallback
+        try{
+          if(!currentTopic){
+            botSay("Pick a topic first 💖 Tap a topic card, then ask me again.");
+            return;
+          }
+
+          setBusy(true);
+          const aiReply = await sendToAI(msg);
+          botSay(aiReply);
+          setBusy(false);
+          updateTutorStatus();
+        }catch(e){
+          setBusy(false);
+          aiOnline = false;
+          updateTutorStatus();
+          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
+(You can keep learning — it still works!)");
+          console.warn("AI fallback:", e);
+          handleOffline(msg);
+        }
       }
 
       // Wire tutor UI
