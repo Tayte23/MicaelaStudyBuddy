@@ -640,43 +640,195 @@
        ========================= -->
   <script>
     window.DATA = window.DATA || {
-      maths: [
-        { section: "Number & Place Value", items: [
-          { id: "m-npv-1", topic: "Counting in multiples (input/output tables)", code: "N1" },
-          { id: "m-npv-2", topic: "Ten more or less / compare & order numbers", code: "N2" },
-          { id: "m-npv-3", topic: "Rounding numbers (to nearest 10/100/1000)", code: "N3" },
-          { id: "m-npv-4", topic: "Negative numbers (order & calculate)", code: "N4" }
-        ]},
-        { section: "Calculations", items: [
-          { id: "m-calc-1", topic: "Add & subtract multi-digit numbers", code: "C1" },
-          { id: "m-calc-2", topic: "Multiply 2–4 digit by 1–2 digit", code: "C2" },
-          { id: "m-calc-3", topic: "Long division (remainders & decimals)", code: "C3" }
-        ]},
-        { section: "Fractions, Decimals & Percentages", items: [
-          { id: "m-fdp-1", topic: "Equivalent fractions & simplifying", code: "F1" },
-          { id: "m-fdp-2", topic: "Add/subtract fractions", code: "F2" },
-          { id: "m-fdp-3", topic: "Percentages of amounts", code: "F3" }
-        ]}
-      ],
-      english: [
-        { section: "Reading", items: [
-          { id: "e-read-1", topic: "Retrieve information (find & copy evidence)", code: "R1" },
-          { id: "e-read-2", topic: "Inference (because… evidence)", code: "R2" },
-          { id: "e-read-3", topic: "Summarise paragraphs (main idea)", code: "R3" }
-        ]},
-        { section: "GPS (Grammar, Punctuation, Spelling)", items: [
-          { id: "e-gps-1", topic: "Sentence types + punctuation", code: "G1" },
-          { id: "e-gps-2", topic: "Commas for meaning / clarity", code: "G2" },
-          { id: "e-gps-3", topic: "Verb tenses & consistency", code: "G3" }
-        ]},
-        { section: "Writing", items: [
-          { id: "e-write-1", topic: "Plan and organise ideas (beginning/middle/end)", code: "W1" },
-          { id: "e-write-2", topic: "Improve sentences (add detail, connectives)", code: "W2" }
-        ]}
-      ]
-    };
+  maths: [
+    { section: "Number & Place Value", items: [
+      { id: "m-npv-01", topic: "Read, write and compare numbers up to 10,000,000", code: "N" },
+      { id: "m-npv-02", topic: "Place value (up to millions)", code: "N" },
+      { id: "m-npv-03", topic: "Powers of 10 (10, 100, 1,000…) and scaling", code: "N" },
+      { id: "m-npv-04", topic: "Count forwards/backwards in steps (incl. decimals)", code: "N" },
+      { id: "m-npv-05", topic: "Multiples, factors and prime numbers", code: "N" },
+      { id: "m-npv-06", topic: "Common factors and common multiples", code: "N" },
+      { id: "m-npv-07", topic: "Rounding to nearest 10/100/1000/10,000/100,000", code: "N" },
+      { id: "m-npv-08", topic: "Estimate and check answers", code: "N" },
+      { id: "m-npv-09", topic: "Negative numbers (order, calculate, real life)", code: "N" },
+      { id: "m-npv-10", topic: "Roman numerals to 1,000 (I–M)", code: "N" },
+      { id: "m-npv-11", topic: "Sequences (including patterns)", code: "N" }
+    ]},
 
-    window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
+    { section: "Calculations (4 Operations)", items: [
+      { id: "m-calc-01", topic: "Add and subtract whole numbers (multi-digit)", code: "C" },
+      { id: "m-calc-02", topic: "Add and subtract decimals (up to 2/3 dp)", code: "C" },
+      { id: "m-calc-03", topic: "Multiply up to 4-digit by 1- and 2-digit", code: "C" },
+      { id: "m-calc-04", topic: "Multiply decimals by whole numbers", code: "C" },
+      { id: "m-calc-05", topic: "Short division", code: "C" },
+      { id: "m-calc-06", topic: "Long division (remainders)", code: "C" },
+      { id: "m-calc-07", topic: "Long division (remainders as fractions/decimals)", code: "C" },
+      { id: "m-calc-08", topic: "Order of operations (BIDMAS basics)", code: "C" },
+      { id: "m-calc-09", topic: "Solve missing number problems", code: "C" }
+    ]},
+
+    { section: "Fractions", items: [
+      { id: "m-frac-01", topic: "Equivalent fractions and simplifying", code: "F" },
+      { id: "m-frac-02", topic: "Compare and order fractions", code: "F" },
+      { id: "m-frac-03", topic: "Fractions on a number line", code: "F" },
+      { id: "m-frac-04", topic: "Add and subtract fractions (same denominator)", code: "F" },
+      { id: "m-frac-05", topic: "Add and subtract fractions (different denominators)", code: "F" },
+      { id: "m-frac-06", topic: "Mixed numbers and improper fractions", code: "F" },
+      { id: "m-frac-07", topic: "Multiply fractions by whole numbers", code: "F" },
+      { id: "m-frac-08", topic: "Find fractions of amounts", code: "F" }
+    ]},
+
+    { section: "Decimals", items: [
+      { id: "m-dec-01", topic: "Place value in decimals (tenths, hundredths, thousandths)", code: "D" },
+      { id: "m-dec-02", topic: "Compare and order decimals", code: "D" },
+      { id: "m-dec-03", topic: "Round decimals (1 dp, 2 dp)", code: "D" },
+      { id: "m-dec-04", topic: "Convert fractions to decimals (common ones)", code: "D" },
+      { id: "m-dec-05", topic: "Add and subtract decimals", code: "D" },
+      { id: "m-dec-06", topic: "Multiply/divide by 10, 100, 1000", code: "D" }
+    ]},
+
+    { section: "Percentages", items: [
+      { id: "m-perc-01", topic: "Understand percent as ‘out of 100’", code: "P" },
+      { id: "m-perc-02", topic: "Percentages of amounts (10%, 25%, 50%, 75%)", code: "P" },
+      { id: "m-perc-03", topic: "Percentages of amounts (any %)", code: "P" },
+      { id: "m-perc-04", topic: "Percent, fraction and decimal equivalences", code: "P" },
+      { id: "m-perc-05", topic: "Percentage increase/decrease (basic)", code: "P" }
+    ]},
+
+    { section: "Ratio & Proportion", items: [
+      { id: "m-ratio-01", topic: "Write and simplify ratios", code: "RP" },
+      { id: "m-ratio-02", topic: "Solve ratio sharing problems", code: "RP" },
+      { id: "m-ratio-03", topic: "Scale factors (enlargement/reduction)", code: "RP" },
+      { id: "m-ratio-04", topic: "Proportion problems (recipes, maps)", code: "RP" }
+    ]},
+
+    { section: "Algebra", items: [
+      { id: "m-alg-01", topic: "Use simple formulae", code: "A" },
+      { id: "m-alg-02", topic: "Find unknowns (missing numbers) with symbols", code: "A" },
+      { id: "m-alg-03", topic: "Generate and describe sequences", code: "A" },
+      { id: "m-alg-04", topic: "One-step equations (e.g., □ + 7 = 20)", code: "A" }
+    ]},
+
+    { section: "Measurement", items: [
+      { id: "m-meas-01", topic: "Convert units (mm/cm/m/km)", code: "M" },
+      { id: "m-meas-02", topic: "Convert units (g/kg) and (ml/l)", code: "M" },
+      { id: "m-meas-03", topic: "Perimeter", code: "M" },
+      { id: "m-meas-04", topic: "Area of rectangles (and simple compound shapes)", code: "M" },
+      { id: "m-meas-05", topic: "Volume of cubes/cuboids (counting cubes)", code: "M" },
+      { id: "m-meas-06", topic: "Money problems (change, totals, best buys)", code: "M" },
+      { id: "m-meas-07", topic: "Time: read clocks + convert units", code: "M" },
+      { id: "m-meas-08", topic: "Time: 24-hour clock", code: "M" },
+      { id: "m-meas-09", topic: "Time: timetables", code: "M" },
+      { id: "m-meas-10", topic: "Speed = distance ÷ time (basic)", code: "M" }
+    ]},
+
+    { section: "Geometry: Properties of Shape", items: [
+      { id: "m-geom-01", topic: "Recognise and name 2D and 3D shapes", code: "G" },
+      { id: "m-geom-02", topic: "Properties of 2D/3D shapes (faces, edges, vertices)", code: "G" },
+      { id: "m-geom-03", topic: "Angles: measure and draw", code: "G" },
+      { id: "m-geom-04", topic: "Angles on a straight line (sum 180°)", code: "G" },
+      { id: "m-geom-05", topic: "Angles around a point (sum 360°)", code: "G" },
+      { id: "m-geom-06", topic: "Angles in triangles (sum 180°)", code: "G" },
+      { id: "m-geom-07", topic: "Angles in quadrilaterals (sum 360°)", code: "G" },
+      { id: "m-geom-08", topic: "Parallel and perpendicular lines", code: "G" }
+    ]},
+
+    { section: "Geometry: Position & Direction", items: [
+      { id: "m-pos-01", topic: "Coordinates (all four quadrants)", code: "PD" },
+      { id: "m-pos-02", topic: "Read and plot coordinates", code: "PD" },
+      { id: "m-pos-03", topic: "Translation", code: "PD" },
+      { id: "m-pos-04", topic: "Reflection", code: "PD" },
+      { id: "m-pos-05", topic: "Rotation", code: "PD" }
+    ]},
+
+    { section: "Statistics", items: [
+      { id: "m-stat-01", topic: "Read and interpret tables", code: "S" },
+      { id: "m-stat-02", topic: "Bar charts", code: "S" },
+      { id: "m-stat-03", topic: "Line graphs", code: "S" },
+      { id: "m-stat-04", topic: "Pie charts (basic reading)", code: "S" },
+      { id: "m-stat-05", topic: "Mean average (basic)", code: "S" }
+    ]},
+
+    { section: "Problem Solving & Reasoning", items: [
+      { id: "m-ps-01", topic: "Multi-step word problems", code: "PS" },
+      { id: "m-ps-02", topic: "Choose the correct operation", code: "PS" },
+      { id: "m-ps-03", topic: "Explain your method (reasoning)", code: "PS" },
+      { id: "m-ps-04", topic: "Check answers using inverse operations", code: "PS" }
+    ]}
+  ],
+
+  english: [
+    { section: "Reading (Question Types)", items: [
+      { id: "e-read-01", topic: "Vocabulary in context (what does this word/phrase mean?)", code: "2a" },
+      { id: "e-read-02", topic: "Retrieve and record information (find & copy evidence)", code: "2b" },
+      { id: "e-read-03", topic: "Summarise main ideas from more than one paragraph", code: "2c" },
+      { id: "e-read-04", topic: "Inference (because… evidence)", code: "2d" },
+      { id: "e-read-05", topic: "Predict what might happen next", code: "2e" },
+      { id: "e-read-06", topic: "Explain how information is related/structured", code: "2f" },
+      { id: "e-read-07", topic: "Explain how meaning is enhanced by language choice", code: "2g" },
+      { id: "e-read-08", topic: "Compare characters/events/themes across texts", code: "2h" }
+    ]},
+
+    { section: "Grammar (Word Classes & Structure)", items: [
+      { id: "e-gram-01", topic: "Nouns (common/proper/abstract) and noun phrases", code: "G" },
+      { id: "e-gram-02", topic: "Pronouns (including relative pronouns)", code: "G" },
+      { id: "e-gram-03", topic: "Verbs (tense, modal verbs)", code: "G" },
+      { id: "e-gram-04", topic: "Adjectives and expanded noun phrases", code: "G" },
+      { id: "e-gram-05", topic: "Adverbs (how/when/where) and fronted adverbials", code: "G" },
+      { id: "e-gram-06", topic: "Prepositions", code: "G" },
+      { id: "e-gram-07", topic: "Conjunctions (coordinating/subordinating)", code: "G" },
+      { id: "e-gram-08", topic: "Main and subordinate clauses", code: "G" },
+      { id: "e-gram-09", topic: "Relative clauses", code: "G" },
+      { id: "e-gram-10", topic: "Active and passive voice", code: "G" },
+      { id: "e-gram-11", topic: "Standard English (avoid slang in formal writing)", code: "G" },
+      { id: "e-gram-12", topic: "Formal vs informal language", code: "G" },
+      { id: "e-gram-13", topic: "Cohesion within and across paragraphs", code: "G" },
+      { id: "e-gram-14", topic: "Subject and object", code: "G" },
+      { id: "e-gram-15", topic: "The subjunctive (e.g., If I were…)", code: "G" }
+    ]},
+
+    { section: "Punctuation", items: [
+      { id: "e-punc-01", topic: "Capital letters and full stops", code: "P" },
+      { id: "e-punc-02", topic: "Question marks and exclamation marks", code: "P" },
+      { id: "e-punc-03", topic: "Commas in a list", code: "P" },
+      { id: "e-punc-04", topic: "Commas for meaning/clarity (including fronted adverbials)", code: "P" },
+      { id: "e-punc-05", topic: "Apostrophes for contraction", code: "P" },
+      { id: "e-punc-06", topic: "Apostrophes for possession (singular/plural)", code: "P" },
+      { id: "e-punc-07", topic: "Inverted commas (speech punctuation)", code: "P" },
+      { id: "e-punc-08", topic: "Colons (introduce a list/explanation)", code: "P" },
+      { id: "e-punc-09", topic: "Semi-colons (link two related clauses)", code: "P" },
+      { id: "e-punc-10", topic: "Dashes and brackets (extra information)", code: "P" },
+      { id: "e-punc-11", topic: "Hyphens", code: "P" },
+      { id: "e-punc-12", topic: "Bullet points", code: "P" }
+    ]},
+
+    { section: "Spelling", items: [
+      { id: "e-spell-01", topic: "Common exception words", code: "Sp" },
+      { id: "e-spell-02", topic: "Prefixes (dis-, mis-, re-, inter-, sub-, anti-, auto-)", code: "Sp" },
+      { id: "e-spell-03", topic: "Suffixes (-ation, -ous, -cial, -tial, -able, -ible)", code: "Sp" },
+      { id: "e-spell-04", topic: "-cious and -tious endings", code: "Sp" },
+      { id: "e-spell-05", topic: "-ant, -ance, -ancy, -ent, -ence, -ency", code: "Sp" },
+      { id: "e-spell-06", topic: "Homophones and near-homophones", code: "Sp" },
+      { id: "e-spell-07", topic: "Silent letters", code: "Sp" },
+      { id: "e-spell-08", topic: "Words ending -fer (refer/referring)", code: "Sp" },
+      { id: "e-spell-09", topic: "Words with ‘ough’", code: "Sp" },
+      { id: "e-spell-10", topic: "Plurals (including -ies, -ves, irregular)", code: "Sp" }
+    ]},
+
+    { section: "Writing", items: [
+      { id: "e-write-01", topic: "Plan writing (purpose, audience, structure)", code: "W" },
+      { id: "e-write-02", topic: "Write to describe (setting/character)", code: "W" },
+      { id: "e-write-03", topic: "Write to narrate (story structure)", code: "W" },
+      { id: "e-write-04", topic: "Write to explain/inform", code: "W" },
+      { id: "e-write-05", topic: "Write to persuade (reasons, evidence)", code: "W" },
+      { id: "e-write-06", topic: "Cohesion (link ideas, paragraphs)", code: "W" },
+      { id: "e-write-07", topic: "Edit and improve (SPaG + stronger words)", code: "W" },
+      { id: "e-write-08", topic: "Handwriting/presentation (when needed)", code: "W" }
+    ]}
+  ]
+};
+
+window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
       "Counting in multiples (input/output tables)": {
         explain: "We follow a rule each time. Example rule: +7 means add 7 each step.",
         example: "Rule is +7. If input is 9, output is 16.",
