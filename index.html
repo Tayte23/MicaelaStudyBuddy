@@ -635,740 +635,795 @@
     </div>
   </div>
 
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-
-  /* ================== Small safety helper ================== */
-  function on(el, event, handler){
-    if(!el) return false;
-    el.addEventListener(event, handler);
-    return true;
-  }
-
-  /* ====== REWARD SETTINGS ====== */
-  const REWARD = { verified: 1.25, confidentBonus: 0.25 };
-
-  /* ====== Confidence Options ====== */
-  const CONF_OPTIONS = [
-    { value: "not", label: "😟 Not confident" },
-    { value: "some", label: "🙂 Getting there" },
-    { value: "yes", label: "😄 Very confident" }
-  ];
-
-  /* ====== DATA (Maths + English) ======
-     We keep the big object outside and expose it as window.DATA.
-     This script reads from window.DATA so it won't self-reference.
-  */
-  const DATA = window.DATA;
-
-  if(!DATA || !DATA.maths || !DATA.english){
-    console.error("DATA missing. Make sure window.DATA is defined before this script runs.");
-    document.body.innerHTML = `
-      <div style="font-family:system-ui;padding:24px;">
-        <h2>⚠️ DATA is missing</h2>
-        <p>Your app loaded, but the <b>DATA</b> object was not found.</p>
-        <p>Fix: ensure your big <code>window.DATA = {...}</code> is defined before this script runs.</p>
-      </div>
-    `;
-    return;
-  }
-
-  /* ====== Storage ====== */
-  const STORAGE_KEY = "micaela_ks2_checklist_v2_verified";
-
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return {};
-      return JSON.parse(raw);
-    }catch(e){
-      return {};
-    }
-  }
-  function saveState(nextState){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-  }
-
-  let state = loadState();
-
-  function getTopicState(id){
-    return state[id] || { conf:"some", practice:false, quizOk:false, explainOk:false };
-  }
-  function setTopicState(id, patch){
-    state[id] = { ...getTopicState(id), ...patch };
-    saveState(state);
-    updateStatsAndProgress();
-    render();
-  }
-
-  function isVerifiedFor(tab, ts){
-    return tab === "maths" ? Boolean(ts.quizOk) : Boolean(ts.explainOk);
-  }
-  function isUnlocked(tab, ts){
-    return isVerifiedFor(tab, ts) && ts.conf === "yes";
-  }
-  function calcEarnedForTopic(tab, ts){
-    if(!isVerifiedFor(tab, ts)) return 0;
-    let money = REWARD.verified;
-    if(ts.conf === "yes") money += REWARD.confidentBonus;
-    return money;
-  }
-
-  /* ====== UI Rendering ====== */
-  const contentEl = document.getElementById("content");
-  const tabs = Array.from(document.querySelectorAll(".tab"));
-  const searchBox = document.getElementById("searchBox");
-  const clearSearchBtn = document.getElementById("clearSearchBtn");
-
-  let activeTab = "maths";
-  let searchText = "";
-
-  tabs.forEach(t => on(t, "click", () => {
-    tabs.forEach(x => x.classList.remove("active"));
-    t.classList.add("active");
-    activeTab = t.dataset.tab;
-    render();
-  }));
-
-  on(searchBox, "input", (e) => {
-    searchText = ((e.target && e.target.value) || "").trim().toLowerCase();
-    render();
-  });
-  on(clearSearchBtn, "click", () => {
-    searchText = "";
-    if(searchBox) searchBox.value = "";
-    render();
-  });
-
-  function badge(text){
-    const span = document.createElement("span");
-    span.className = "badge";
-    span.textContent = text;
-    return span;
-  }
-
-  function render(){
-    if(!contentEl) return;
-    const sections = DATA[activeTab];
-    contentEl.innerHTML = "";
-
-    sections.forEach(sec => {
-      const filteredItems = sec.items.filter(it => {
-        if(!searchText) return true;
-        const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
-        return hay.includes(searchText);
-      });
-      if(filteredItems.length === 0) return;
-
-      const details = document.createElement("details");
-      details.className = "section";
-      details.open = !searchText;
-
-      const summary = document.createElement("summary");
-      const left = document.createElement("div");
-      left.textContent = sec.section;
-
-      const meta = document.createElement("div");
-      meta.className = "sectionMeta";
-      const secStats = getSectionStats(activeTab, filteredItems);
-      meta.appendChild(badge(`💰 £${secStats.money.toFixed(2)}`));
-      meta.appendChild(badge(`✅ ${secStats.done}/${filteredItems.length}`));
-
-      summary.appendChild(left);
-      summary.appendChild(meta);
-
-      const cards = document.createElement("div");
-      cards.className = "cards";
-      filteredItems.forEach(it => cards.appendChild(renderCard(it)));
-
-      details.appendChild(summary);
-      details.appendChild(cards);
-      contentEl.appendChild(details);
-    });
-
-    updateStatsAndProgress();
-  }
-
-  function checkboxPill(text, checked, onChange){
-    const lbl = document.createElement("label");
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = checked;
-    on(cb, "change", () => onChange(cb.checked));
-    const span = document.createElement("span");
-    span.textContent = text;
-    lbl.appendChild(cb);
-    lbl.appendChild(span);
-    return lbl;
-  }
-
-  /* ============================
-     Tutor Chat (kept from existing)
-     ============================ */
-  const tutorPanel = document.getElementById("tutorPanel");
-  const tutorFab = document.getElementById("tutorFab");
-  const tutorTopicEl = document.getElementById("tutorTopic");
-  const chatLog = document.getElementById("chatLog");
-  const chatInput = document.getElementById("chatInput");
-  const sendBtn = document.getElementById("sendBtn");
-  const passSupportive = document.getElementById("passSupportive");
-  const closeTutor = document.getElementById("closeTutor");
-
-  const qExplain = document.getElementById("qExplain");
-  const qExample = document.getElementById("qExample");
-  const qQuiz = document.getElementById("qQuiz");
-  const qExplainBack = document.getElementById("qExplainBack");
-  const qVisual = document.getElementById("qVisual");
-
-  let passMode = "supportive"; // A mode
-  let currentTopic = null;     // {id, topic, code}
-
-  function openTutor(){ if(tutorPanel) tutorPanel.classList.add("open"); }
-  function closeTutorPanel(){ if(tutorPanel) tutorPanel.classList.remove("open"); }
-
-  function setPassMode(next){
-    passMode = next;
-    if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
-    if(passMode === "supportive"){
-      botSay("A Mode ✅
-I will be kind and accept \"close enough\" if your understanding is clear 💖
-I may ask you to add a quick example.");
-    }
-  }
-
-  function setCurrentTopic(item){
-    currentTopic = item;
-    if(tutorTopicEl) tutorTopicEl.textContent = `Topic: ${item.topic}`;
-  }
-
-  function addMsg(role, text){
-    if(!chatLog) return;
-    const row = document.createElement("div");
-    row.className = `msg ${role}`;
-    const b = document.createElement("div");
-    b.className = "bubble";
-    b.textContent = text;
-    row.appendChild(b);
-    chatLog.appendChild(row);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-  function botSay(text){ addMsg("bot", text); }
-  function userSay(text){ addMsg("user", text); }
-
-  function ensureTopicSelected(){
-    if(currentTopic) return true;
-    botSay("Pick a topic first 💖 Tap ‘Take Tutor Quiz’ (Maths) or ‘Explain-back’ (English) on a topic card.");
-    return false;
-  }
-
-  function evaluateExplainBack(rawText, expected){
-    const text = String(rawText || "").trim();
-    const low = text.toLowerCase();
-
-    const hasReason = /because|so|this shows|that means|so that|therefore/.test(low);
-    const hasExample = /for example|eg|e\.g\.|like|for instance|"/.test(low);
-    const longEnough = text.length >= 28;
-
-    const mustAny = (expected?.mustIncludeAny || []).map(s => String(s).toLowerCase());
-    const niceAny = (expected?.niceToIncludeAny || []).map(s => String(s).toLowerCase());
-
-    const hitsMust = mustAny.filter(k => k && low.includes(k));
-    const hitsNice = niceAny.filter(k => k && low.includes(k));
-
-    let score = 0;
-    if(longEnough) score += 1;
-    if(hasReason) score += 2;
-    if(hasExample) score += 1;
-    if(hitsMust.length >= 1) score += 1;
-    if(hitsMust.length >= 2) score += 1;
-    if(hitsNice.length >= 1) score += 1;
-
-    const coreIdea = (hitsMust.length >= 1) || (hitsNice.length >= 2);
-    const ok = (coreIdea && hasReason) || (coreIdea && hasExample && longEnough) || (score >= 4 && (hasReason || hasExample));
-
-    let feedback = "";
-    if(!ok){
-      const needs = [];
-      if(!longEnough) needs.push("a bit more detail (1–2 more sentences)");
-      if(!hasReason) needs.push("a *because* (why it works / why it means that)");
-      if(!hasExample) needs.push("a quick example");
-      feedback = `Almost 💖 — you’re close! Please add:
-• ${needs.slice(0,3).join("
-• ")}
-Then send again ✨`;
-    }
-
-    return { ok, score, hitsMust, hitsNice, hasReason, hasExample, longEnough, feedback };
-  }
-
-  const OFFLINE_TUTOR = window.OFFLINE_TUTOR || {};
-
-  function getOfflinePack(topicName){
-    if(OFFLINE_TUTOR[topicName]) return OFFLINE_TUTOR[topicName];
-    const key = Object.keys(OFFLINE_TUTOR).find(k => topicName.toLowerCase().includes(k.toLowerCase().slice(0,12)));
-    return key ? OFFLINE_TUTOR[key] : null;
-  }
-
-  function renderVisual(fn){
-    if(!chatLog) return;
-    const wrap = document.createElement("div");
-    wrap.className = "miniVisual";
-    wrap.innerHTML = fn();
-
-    const row = document.createElement("div");
-    row.className = "msg bot";
-    const b = document.createElement("div");
-    b.className = "bubble";
-    b.textContent = "Here’s a visual:";
-    row.appendChild(b);
-
-    chatLog.appendChild(row);
-    chatLog.appendChild(wrap);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  let tutorExpected = null;
-  let tutorExpectedType = null; // quiz | explainBack
-
-  function markVerified(){
-    if(!currentTopic) return;
-    if(activeTab === "maths") setTopicState(currentTopic.id, { quizOk:true });
-    else setTopicState(currentTopic.id, { explainOk:true });
-  }
-
-  function handleOffline(message){
-    if(!ensureTopicSelected()) return;
-    const pack = getOfflinePack(currentTopic.topic);
-
-    if(tutorExpectedType === "quiz" && tutorExpected){
-      const ans = message.trim().toLowerCase();
-      const exp = String(tutorExpected).trim().toLowerCase();
-      if(ans === exp){
-        botSay("✅ YESSS! That’s correct! 🌟
-I’ve verified this topic.");
-        if(activeTab === "maths"){
-          markVerified();
-          botSay("Now set confidence to 😄 to unlock money 💰");
-        } else {
-          botSay("(For English, verification is Explain-back. Tap Explain-back.)");
-        }
-      } else {
-        botSay(`Almost! 💖 The answer is: ${tutorExpected}.
-Want me to explain why?`);
-      }
-      tutorExpected = null;
-      tutorExpectedType = null;
-      return;
-    }
-
-    if(tutorExpectedType === "explainBack" && tutorExpected){
-      const result = evaluateExplainBack(message, tutorExpected);
-      if(result.ok){
-        botSay("✅ Great explain-back! That shows understanding 🌟
-I’ve verified this topic.");
-        if(activeTab === "english"){
-          markVerified();
-          botSay("Now set confidence to 😄 to unlock money 💰");
-        }
-        tutorExpected = null;
-        tutorExpectedType = null;
-        return;
-      }
-      botSay(result.feedback);
-      if(tutorExpected?.mustIncludeAny?.length){
-        botSay(`Hint words: ${tutorExpected.mustIncludeAny.slice(0,6).join(", ")}${tutorExpected.mustIncludeAny.length>6?"…":""}`);
-      }
-      return;
-    }
-
-    if(!pack){
-      botSay(`I can help with “${currentTopic.topic}” 💖
-Tell me what feels tricky and I’ll explain step-by-step.`);
-      if(/visual|draw|show/i.test(message) && typeof simpleStepsVisual === "function"){
-        renderVisual(() => simpleStepsVisual(["What is it?","How do we do it?","Try 1 example","Quick check"]));
-      }
-      return;
-    }
-
-    // Lesson command (new): gives a mini lesson
-    if(/lesson|teach|start lesson/i.test(message)){
-      botSay("Lesson time 💖
-" + (pack.explain || "Let’s break it down into tiny steps."));
-      if(pack.visual) renderVisual(pack.visual);
-      if(pack.example) botSay("Example ✅
-" + pack.example);
-      if(activeTab === "maths" && pack.quiz){
-        botSay("Now try a quick quiz to show you understand ✨
-" + pack.quiz.q);
-        botSay("Reply with your answer.");
-        tutorExpected = pack.quiz.a;
-        tutorExpectedType = "quiz";
-      }
-      if(activeTab === "english" && pack.explainBack){
-        botSay("Now explain it back in your own words ✅
-" + pack.explainBack.prompt);
-        tutorExpected = pack.explainBack;
-        tutorExpectedType = "explainBack";
-      }
-      return;
-    }
-
-    if(/explain-back|explain back/i.test(message)){
-      if(activeTab !== "english"){
-        botSay("Explain-back is mainly for English ✅
-For Maths, use Quick Quiz.");
-        return;
-      }
-      if(!pack.explainBack){
-        botSay("Let’s do explain-back 💖
-Explain this topic in your own words. Include at least 2 key ideas.");
-        tutorExpected = { mustIncludeAny:["because","rule","example"], niceToIncludeAny:[] };
-        tutorExpectedType = "explainBack";
-        return;
-      }
-      botSay("Explain-back ✅
-" + pack.explainBack.prompt);
-      tutorExpected = pack.explainBack;
-      tutorExpectedType = "explainBack";
-      return;
-    }
-
-    if(/quiz|question|test/i.test(message)){
-      if(activeTab !== "maths"){
-        botSay("For English, verification is Explain-back ✅
-Tap Explain-back.");
-        return;
-      }
-      if(!pack.quiz){
-        botSay("Quick quiz ✨
-(This topic doesn’t have a built-in quiz yet — we can add one.)");
-        return;
-      }
-      botSay("Quick quiz ✨
-" + pack.quiz.q);
-      botSay("Reply with your answer.");
-      tutorExpected = pack.quiz.a;
-      tutorExpectedType = "quiz";
-      return;
-    }
-
-    if(/example|show me/i.test(message)){
-      botSay(pack.example || "Here’s a simple example: try one step at a time.");
-      return;
-    }
-
-    if(/visual|draw|picture|diagram/i.test(message)){
-      if(pack.visual) renderVisual(pack.visual);
-      else if(typeof simpleStepsVisual === "function") renderVisual(() => simpleStepsVisual(["What is it?","Key rule","Try example","Check answer"]));
-      return;
-    }
-
-    if(/explain/i.test(message)){
-      botSay(pack.explain || "Let’s break it down into small steps 💖");
-      return;
-    }
-
-    // Default
-    botSay(pack.explain || "Tell me what part feels tricky 💖");
-  }
-
-  function sendChat(text){
-    const msg = (text ?? (chatInput ? chatInput.value : "")).trim();
-    if(!msg) return;
-    userSay(msg);
-    if(chatInput) chatInput.value = "";
-    handleOffline(msg);
-  }
-
-  // Wire tutor UI
-  on(qExplain, "click", () => sendChat("explain"));
-  on(qExample, "click", () => sendChat("example"));
-  on(qQuiz, "click", () => sendChat("quiz"));
-  on(qExplainBack, "click", () => sendChat("explain-back"));
-  on(qVisual, "click", () => sendChat("show visual"));
-
-  on(sendBtn, "click", () => sendChat());
-  on(chatInput, "keydown", (e) => { if(e.key === "Enter") sendChat(); });
-
-  on(passSupportive, "click", () => setPassMode("supportive"));
-  on(closeTutor, "click", closeTutorPanel);
-
-  on(tutorFab, "click", () => {
-    openTutor();
-    if(chatLog && !chatLog.childElementCount){
-      botSay("Hi Micaela 💖 I’m your tutor!
-Tap ‘Take Tutor Quiz’ (Maths) or ‘Explain-back’ (English) on a topic to unlock rewards.
-You can also tap ‘Take Lesson’ for a mini lesson ✨");
-    }
-  });
-
-  /* ====== Topic Cards ====== */
-  function renderCard(item){
-    const ts = getTopicState(item.id);
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const row1 = document.createElement("div");
-    row1.className = "row1";
-
-    const topic = document.createElement("div");
-    topic.className = "topic";
-    topic.textContent = item.topic;
-
-    const code = document.createElement("div");
-    code.className = "code";
-    code.textContent = item.code || "";
-
-    row1.appendChild(topic);
-    row1.appendChild(code);
-
-    const controls = document.createElement("div");
-    controls.className = "controls";
-
-    const confWrap = document.createElement("div");
-    confWrap.className = "conf";
-    const confLabel = document.createElement("label");
-    confLabel.textContent = "Confidence:";
-    const sel = document.createElement("select");
-    CONF_OPTIONS.forEach(opt => {
-      const o = document.createElement("option");
-      o.value = opt.value;
-      o.textContent = opt.label;
-      sel.appendChild(o);
-    });
-    sel.value = ts.conf;
-    on(sel, "change", () => setTopicState(item.id, { conf: sel.value }));
-    confWrap.appendChild(confLabel);
-    confWrap.appendChild(sel);
-
-    const checks = document.createElement("div");
-    checks.className = "checks";
-    checks.appendChild(checkboxPill("IXL practice done", ts.practice, (val) => setTopicState(item.id, { practice: val })));
-
-    const actions = document.createElement("div");
-    actions.style.display = "flex";
-    actions.style.gap = "10px";
-    actions.style.flexWrap = "wrap";
-    actions.style.justifyContent = "flex-end";
-
-    // NEW: Take Lesson button
-    const lessonBtn = document.createElement("button");
-    lessonBtn.className = "askBtn";
-    lessonBtn.type = "button";
-    lessonBtn.textContent = "🩷 Take Lesson";
-    on(lessonBtn, "click", () => {
-      setCurrentTopic(item);
-      openTutor();
-      botSay(`Lesson for: ${item.topic} ✨`);
-      sendChat("lesson");
-    });
-
-    // Existing: verification button
-    const askBtn = document.createElement("button");
-    askBtn.className = "askBtn";
-    askBtn.type = "button";
-    askBtn.textContent = activeTab === "maths" ? "🩷 Take Tutor Quiz" : "🩷 Explain-back to Tutor";
-    on(askBtn, "click", () => {
-      setCurrentTopic(item);
-      openTutor();
-      if(activeTab === "maths"){
-        botSay(`Hi Micaela 💖
-To unlock money for “${item.topic}”, pass the Tutor quiz ✅
-Tap Quick Quiz or type: quiz`);
-      } else {
-        botSay(`Hi Micaela 💖
-To unlock money for “${item.topic}”, explain it back in your own words ✅
-Tap Explain-back or type: explain-back`);
-      }
-    });
-
-    actions.appendChild(lessonBtn);
-    actions.appendChild(askBtn);
-
-    controls.appendChild(confWrap);
-    controls.appendChild(checks);
-    controls.appendChild(actions);
-
-    const pills = document.createElement("div");
-    pills.className = "pills";
-
-    const verified = isVerifiedFor(activeTab, ts);
-    const needed = activeTab === "maths" ? "Quiz" : "Explain-back";
-    const unlocked = isUnlocked(activeTab, ts);
-
-    const vChip = document.createElement("span");
-    vChip.className = "chip2";
-    vChip.textContent = verified ? `✅ ${needed} verified` : `🔒 ${needed} not verified`;
-
-    const cChip = document.createElement("span");
-    cChip.className = "chip2";
-    cChip.textContent = (ts.conf === "yes") ? "😄 Confidence set" : "🙂 Set confidence to 😄";
-
-    const uChip = document.createElement("span");
-    uChip.className = "chip2";
-    uChip.textContent = unlocked ? "💰 Reward unlocked" : "⏳ Reward locked";
-
-    pills.appendChild(vChip);
-    pills.appendChild(cChip);
-    pills.appendChild(uChip);
-
-    const earnedRow = document.createElement("div");
-    earnedRow.className = "earnedRow";
-    const earnedAmt = calcEarnedForTopic(activeTab, ts);
-
-    const tag1 = document.createElement("span");
-    tag1.className = "tagEarned";
-    tag1.textContent = `💸 Earned: £${earnedAmt.toFixed(2)}`;
-
-    const tag2 = document.createElement("span");
-    tag2.className = "tagEarned";
-    tag2.textContent = unlocked ? "🌟 Unlocked!" : "⏳ Keep going";
-
-    earnedRow.appendChild(tag1);
-    earnedRow.appendChild(tag2);
-
-    card.appendChild(row1);
-    card.appendChild(controls);
-    card.appendChild(pills);
-    card.appendChild(earnedRow);
-
-    return card;
-  }
-
-  /* ====== Stats helpers used above ====== */
-  function getAllTopics(){
-    const all = [];
-    Object.keys(DATA).forEach(k => DATA[k].forEach(sec => sec.items.forEach(it => all.push({ ...it, tab:k }))));
-    return all;
-  }
-
-  function getSectionStats(tab, items){
-    let money = 0;
-    let done = 0;
-    items.forEach(it => {
-      const ts = getTopicState(it.id);
-      money += calcEarnedForTopic(tab, ts);
-      if(isUnlocked(tab, ts)) done += 1;
-    });
-    return { money, done };
-  }
-
-  function updateStatsAndProgress(){
-    const all = getAllTopics();
-    let totalMoney = 0;
-    let topicsDone = 0;
-
-    all.forEach(it => {
-      const ts = getTopicState(it.id);
-      totalMoney += calcEarnedForTopic(it.tab, ts);
-      if(isUnlocked(it.tab, ts)) topicsDone += 1;
-    });
-
-    const totalMoneyEl = document.getElementById("totalMoney");
-    const topicsDoneEl = document.getElementById("topicsDone");
-    if(totalMoneyEl) totalMoneyEl.textContent = `£${totalMoney.toFixed(2)}`;
-    if(topicsDoneEl) topicsDoneEl.textContent = `${topicsDone}`;
-
-    const visible = [];
-    DATA[activeTab].forEach(sec => sec.items.forEach(it => {
-      if(!searchText) { visible.push(it); return; }
-      const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
-      if(hay.includes(searchText)) visible.push(it);
-    }));
-
-    const totalVisible = visible.length || 1;
-    let doneVisible = 0;
-    visible.forEach(it => {
-      const ts = getTopicState(it.id);
-      if(isUnlocked(activeTab, ts)) doneVisible += 1;
-    });
-
-    const pct = Math.round((doneVisible / totalVisible) * 100);
-    const fill = document.getElementById("progressFill");
-    const pctEl = document.getElementById("progressPct");
-    if(fill) fill.style.width = `${pct}%`;
-    if(pctEl) pctEl.textContent = `${pct}%`;
-  }
-
-  /* ====== Export / Import / Reset ====== */
-  const resetBtn = document.getElementById("resetBtn");
-  const exportBtn = document.getElementById("exportBtn");
-  const importBtn = document.getElementById("importBtn");
-
-  on(resetBtn, "click", () => {
-    if(!confirm("Reset ALL progress? This will clear practice, confidence, and tutor verification.")) return;
-    state = {};
-    saveState(state);
-    render();
-  });
-
-  on(exportBtn, "click", () => {
-    const payload = {
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      reward: REWARD,
-      state
+  <!-- =========================
+       KS2 Topic Data (restored)
+       ========================= -->
+  <script>
+    window.DATA = window.DATA || {
+      maths: [
+        { section: "Number & Place Value", items: [
+          { id: "m-npv-1", topic: "Counting in multiples (input/output tables)", code: "N1" },
+          { id: "m-npv-2", topic: "Ten more or less / compare & order numbers", code: "N2" },
+          { id: "m-npv-3", topic: "Rounding numbers (to nearest 10/100/1000)", code: "N3" },
+          { id: "m-npv-4", topic: "Negative numbers (order & calculate)", code: "N4" }
+        ]},
+        { section: "Calculations", items: [
+          { id: "m-calc-1", topic: "Add & subtract multi-digit numbers", code: "C1" },
+          { id: "m-calc-2", topic: "Multiply 2–4 digit by 1–2 digit", code: "C2" },
+          { id: "m-calc-3", topic: "Long division (remainders & decimals)", code: "C3" }
+        ]},
+        { section: "Fractions, Decimals & Percentages", items: [
+          { id: "m-fdp-1", topic: "Equivalent fractions & simplifying", code: "F1" },
+          { id: "m-fdp-2", topic: "Add/subtract fractions", code: "F2" },
+          { id: "m-fdp-3", topic: "Percentages of amounts", code: "F3" }
+        ]}
+      ],
+      english: [
+        { section: "Reading", items: [
+          { id: "e-read-1", topic: "Retrieve information (find & copy evidence)", code: "R1" },
+          { id: "e-read-2", topic: "Inference (because… evidence)", code: "R2" },
+          { id: "e-read-3", topic: "Summarise paragraphs (main idea)", code: "R3" }
+        ]},
+        { section: "GPS (Grammar, Punctuation, Spelling)", items: [
+          { id: "e-gps-1", topic: "Sentence types + punctuation", code: "G1" },
+          { id: "e-gps-2", topic: "Commas for meaning / clarity", code: "G2" },
+          { id: "e-gps-3", topic: "Verb tenses & consistency", code: "G3" }
+        ]},
+        { section: "Writing", items: [
+          { id: "e-write-1", topic: "Plan and organise ideas (beginning/middle/end)", code: "W1" },
+          { id: "e-write-2", topic: "Improve sentences (add detail, connectives)", code: "W2" }
+        ]}
+      ]
     };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "micaela-checklist-progress.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
 
-  on(importBtn, "click", async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if(!file) return;
-      const text = await file.text();
-      try{
-        const parsed = JSON.parse(text);
-        if(!parsed || typeof parsed !== "object" || !parsed.state) throw new Error("Invalid file");
-        state = parsed.state || {};
+    window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
+      "Counting in multiples (input/output tables)": {
+        explain: "We follow a rule each time. Example rule: +7 means add 7 each step.",
+        example: "Rule is +7. If input is 9, output is 16.",
+        quiz: { q: "Rule is +7. If input is 9, what is output?", a: "16" },
+        explainBack: {
+          prompt: "Explain what an input/output table is and how you use the rule.",
+          mustIncludeAny: ["rule", "each"],
+          niceToIncludeAny: ["input", "output", "table", "example"]
+        }
+      },
+      "Inference (because… evidence)": {
+        explain: "Inference means you work something out that isn’t directly said, using clues from the text.",
+        example: "Text: ‘He put on his coat and grabbed an umbrella.’ Inference: It’s raining, because he needs an umbrella.",
+        explainBack: {
+          prompt: "Explain inference in your own words and give a quick example.",
+          mustIncludeAny: ["clues", "because"],
+          niceToIncludeAny: ["evidence", "text", "example"]
+        }
+      }
+    };
+  </script>
+
+  <!-- =========================
+       App logic
+       ========================= -->
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+
+      // ================== Small safety helper ==================
+      function on(el, event, handler){
+        if(!el) return false;
+        el.addEventListener(event, handler);
+        return true;
+      }
+
+      // ====== REWARD SETTINGS ======
+      const REWARD = { verified: 1.25, confidentBonus: 0.25 };
+
+      // ====== Confidence Options ======
+      const CONF_OPTIONS = [
+        { value: "not", label: "😟 Not confident" },
+        { value: "some", label: "🙂 Getting there" },
+        { value: "yes", label: "😄 Very confident" }
+      ];
+
+      // ====== DATA ======
+      const DATA = window.DATA;
+
+      if(!DATA || !DATA.maths || !DATA.english){
+        console.error("DATA missing. Make sure window.DATA is defined before this script runs.");
+        document.body.innerHTML = `
+          <div style="font-family:system-ui;padding:24px;">
+            <h2>⚠️ DATA is missing</h2>
+            <p>Your app loaded, but the <b>DATA</b> object was not found.</p>
+            <p>Fix: ensure <code>window.DATA = {...}</code> is defined before this script runs.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // ====== Storage ======
+      const STORAGE_KEY = "micaela_ks2_checklist_v2_verified";
+
+      function loadState(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if(!raw) return {};
+          return JSON.parse(raw);
+        }catch(e){
+          return {};
+        }
+      }
+      function saveState(nextState){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+      }
+
+      let state = loadState();
+
+      function getTopicState(id){
+        return state[id] || { conf:"some", practice:false, quizOk:false, explainOk:false };
+      }
+      function setTopicState(id, patch){
+        state[id] = { ...getTopicState(id), ...patch };
+        saveState(state);
+        updateStatsAndProgress();
+        render();
+      }
+
+      function isVerifiedFor(tab, ts){
+        return tab === "maths" ? Boolean(ts.quizOk) : Boolean(ts.explainOk);
+      }
+      function isUnlocked(tab, ts){
+        return isVerifiedFor(tab, ts) && ts.conf === "yes";
+      }
+      function calcEarnedForTopic(tab, ts){
+        if(!isVerifiedFor(tab, ts)) return 0;
+        let money = REWARD.verified;
+        if(ts.conf === "yes") money += REWARD.confidentBonus;
+        return money;
+      }
+
+      // ====== UI Rendering ======
+      const contentEl = document.getElementById("content");
+      const tabs = Array.from(document.querySelectorAll(".tab"));
+      const searchBox = document.getElementById("searchBox");
+      const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+      let activeTab = "maths";
+      let searchText = "";
+
+      tabs.forEach(t => on(t, "click", () => {
+        tabs.forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        activeTab = t.dataset.tab;
+        render();
+      }));
+
+      on(searchBox, "input", (e) => {
+        searchText = ((e.target && e.target.value) || "").trim().toLowerCase();
+        render();
+      });
+      on(clearSearchBtn, "click", () => {
+        searchText = "";
+        if(searchBox) searchBox.value = "";
+        render();
+      });
+
+      function badge(text){
+        const span = document.createElement("span");
+        span.className = "badge";
+        span.textContent = text;
+        return span;
+      }
+
+      function render(){
+        if(!contentEl) return;
+        const sections = DATA[activeTab];
+        contentEl.innerHTML = "";
+
+        sections.forEach(sec => {
+          const filteredItems = sec.items.filter(it => {
+            if(!searchText) return true;
+            const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
+            return hay.includes(searchText);
+          });
+          if(filteredItems.length === 0) return;
+
+          const details = document.createElement("details");
+          details.className = "section";
+          details.open = !searchText;
+
+          const summary = document.createElement("summary");
+          const left = document.createElement("div");
+          left.textContent = sec.section;
+
+          const meta = document.createElement("div");
+          meta.className = "sectionMeta";
+          const secStats = getSectionStats(activeTab, filteredItems);
+          meta.appendChild(badge(`💰 £${secStats.money.toFixed(2)}`));
+          meta.appendChild(badge(`✅ ${secStats.done}/${filteredItems.length}`));
+
+          summary.appendChild(left);
+          summary.appendChild(meta);
+
+          const cards = document.createElement("div");
+          cards.className = "cards";
+          filteredItems.forEach(it => cards.appendChild(renderCard(it)));
+
+          details.appendChild(summary);
+          details.appendChild(cards);
+          contentEl.appendChild(details);
+        });
+
+        updateStatsAndProgress();
+      }
+
+      function checkboxPill(text, checked, onChange){
+        const lbl = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = checked;
+        on(cb, "change", () => onChange(cb.checked));
+        const span = document.createElement("span");
+        span.textContent = text;
+        lbl.appendChild(cb);
+        lbl.appendChild(span);
+        return lbl;
+      }
+
+      // ============================
+      // Tutor Chat (OFFLINE ONLY)
+      // ============================
+      const tutorPanel = document.getElementById("tutorPanel");
+      const tutorFab = document.getElementById("tutorFab");
+      const tutorTopicEl = document.getElementById("tutorTopic");
+      const chatLog = document.getElementById("chatLog");
+      const chatInput = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const passSupportive = document.getElementById("passSupportive");
+      const closeTutor = document.getElementById("closeTutor");
+
+      const qExplain = document.getElementById("qExplain");
+      const qExample = document.getElementById("qExample");
+      const qQuiz = document.getElementById("qQuiz");
+      const qExplainBack = document.getElementById("qExplainBack");
+      const qVisual = document.getElementById("qVisual");
+
+      let passMode = "supportive";
+      let currentTopic = null;
+
+      function openTutor(){ if(tutorPanel) tutorPanel.classList.add("open"); }
+      function closeTutorPanel(){ if(tutorPanel) tutorPanel.classList.remove("open"); }
+
+      function setPassMode(next){
+        passMode = next;
+        if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
+        if(passMode === "supportive"){
+          botSay("A Mode ✅\nI will be kind and accept \"close enough\" if your understanding is clear 💖\nI may ask you to add a quick example.");
+        }
+      }
+
+      function setCurrentTopic(item){
+        currentTopic = item;
+        if(tutorTopicEl) tutorTopicEl.textContent = `Topic: ${item.topic}`;
+      }
+
+      function addMsg(role, text){
+        if(!chatLog) return;
+        const row = document.createElement("div");
+        row.className = `msg ${role}`;
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.textContent = text;
+        row.appendChild(b);
+        chatLog.appendChild(row);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+      function botSay(text){ addMsg("bot", text); }
+      function userSay(text){ addMsg("user", text); }
+
+      function ensureTopicSelected(){
+        if(currentTopic) return true;
+        botSay("Pick a topic first 💖 Tap ‘Take Tutor Quiz’ (Maths) or ‘Explain-back’ (English) on a topic card.");
+        return false;
+      }
+
+      function evaluateExplainBack(rawText, expected){
+        const text = String(rawText || "").trim();
+        const low = text.toLowerCase();
+
+        const hasReason = /\bbecause\b|\bso\b|\bthis shows\b|\bthat means\b|\bso that\b|\btherefore\b/.test(low);
+        const hasExample = /\bfor example\b|\beg\b|\be\.g\.\b|\blike\b|\bfor instance\b|\"/.test(low);
+        const longEnough = text.length >= 28;
+
+        const mustAny = (expected?.mustIncludeAny || []).map(s => String(s).toLowerCase());
+        const niceAny = (expected?.niceToIncludeAny || []).map(s => String(s).toLowerCase());
+
+        const hitsMust = mustAny.filter(k => k && low.includes(k));
+        const hitsNice = niceAny.filter(k => k && low.includes(k));
+
+        let score = 0;
+        if(longEnough) score += 1;
+        if(hasReason) score += 2;
+        if(hasExample) score += 1;
+        if(hitsMust.length >= 1) score += 1;
+        if(hitsMust.length >= 2) score += 1;
+        if(hitsNice.length >= 1) score += 1;
+
+        const coreIdea = (hitsMust.length >= 1) || (hitsNice.length >= 2);
+        const ok = (coreIdea && hasReason) || (coreIdea && hasExample && longEnough) || (score >= 4 && (hasReason || hasExample));
+
+        let feedback = "";
+        if(!ok){
+          const needs = [];
+          if(!longEnough) needs.push("a bit more detail (1–2 more sentences)");
+          if(!hasReason) needs.push("a *because* (why it works / why it means that)");
+          if(!hasExample) needs.push("a quick example");
+          feedback = `Almost 💖 — you’re close! Please add:\n• ${needs.slice(0,3).join("\n• ")}\nThen send again ✨`;
+        }
+
+        return { ok, feedback };
+      }
+
+      const OFFLINE_TUTOR = window.OFFLINE_TUTOR || {};
+
+      function getOfflinePack(topicName){
+        if(OFFLINE_TUTOR[topicName]) return OFFLINE_TUTOR[topicName];
+        const key = Object.keys(OFFLINE_TUTOR).find(k => topicName.toLowerCase().includes(k.toLowerCase().slice(0,12)));
+        return key ? OFFLINE_TUTOR[key] : null;
+      }
+
+      function renderVisual(fn){
+        if(!chatLog) return;
+        const wrap = document.createElement("div");
+        wrap.className = "miniVisual";
+        wrap.innerHTML = fn();
+
+        const row = document.createElement("div");
+        row.className = "msg bot";
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.textContent = "Here’s a visual:";
+        row.appendChild(b);
+
+        chatLog.appendChild(row);
+        chatLog.appendChild(wrap);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+
+      function simpleStepsVisual(steps){
+        return `
+          <div style="font-weight:950;margin-bottom:8px;">Let’s learn it step-by-step</div>
+          <div style="display:grid; gap:8px;">
+            ${steps.map((s,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:900;">${i+1}. ${s}</div>`).join("")}
+          </div>`;
+      }
+
+      let tutorExpected = null;
+      let tutorExpectedType = null; // quiz | explainBack
+
+      function markVerified(){
+        if(!currentTopic) return;
+        if(activeTab === "maths") setTopicState(currentTopic.id, { quizOk:true });
+        else setTopicState(currentTopic.id, { explainOk:true });
+      }
+
+      function handleOffline(message){
+        if(!ensureTopicSelected()) return;
+        const pack = getOfflinePack(currentTopic.topic);
+
+        // Quiz answers
+        if(tutorExpectedType === "quiz" && tutorExpected){
+          const ans = message.trim().toLowerCase();
+          const exp = String(tutorExpected).trim().toLowerCase();
+          if(ans === exp){
+            botSay("✅ YESSS! That’s correct! 🌟\nI’ve verified this topic.");
+            if(activeTab === "maths"){
+              markVerified();
+              botSay("Now set confidence to 😄 to unlock money 💰");
+            } else {
+              botSay("(For English, verification is Explain-back. Tap Explain-back.)");
+            }
+          } else {
+            botSay(`Almost! 💖 The answer is: ${tutorExpected}.\nWant me to explain why?`);
+          }
+          tutorExpected = null;
+          tutorExpectedType = null;
+          return;
+        }
+
+        // Explain-back submission
+        if(tutorExpectedType === "explainBack" && tutorExpected){
+          const result = evaluateExplainBack(message, tutorExpected);
+          if(result.ok){
+            botSay("✅ Great explain-back! That shows understanding 🌟\nI’ve verified this topic.");
+            if(activeTab === "english"){
+              markVerified();
+              botSay("Now set confidence to 😄 to unlock money 💰");
+            }
+            tutorExpected = null;
+            tutorExpectedType = null;
+            return;
+          }
+          botSay(result.feedback);
+          if(tutorExpected?.mustIncludeAny?.length){
+            botSay(`Hint words: ${tutorExpected.mustIncludeAny.slice(0,6).join(", ")}${tutorExpected.mustIncludeAny.length>6?"…":""}`);
+          }
+          return;
+        }
+
+        // No pack
+        if(!pack){
+          botSay(`I can help with “${currentTopic.topic}” 💖\nTell me what feels tricky and I’ll explain step-by-step.`);
+          if(/visual|draw|show/i.test(message)){
+            renderVisual(() => simpleStepsVisual(["What is it?","How do we do it?","Try 1 example","Quick check"]));
+          }
+          return;
+        }
+
+        // Lesson command
+        if(/lesson|teach|start lesson/i.test(message)){
+          botSay("Lesson time 💖\n" + (pack.explain || "Let’s break it down into tiny steps."));
+          if(pack.visual) renderVisual(pack.visual);
+          if(pack.example) botSay("Example ✅\n" + pack.example);
+
+          if(activeTab === "maths" && pack.quiz){
+            botSay("Now try a quick quiz to show you understand ✨\n" + pack.quiz.q);
+            botSay("Reply with your answer.");
+            tutorExpected = pack.quiz.a;
+            tutorExpectedType = "quiz";
+          }
+          if(activeTab === "english" && pack.explainBack){
+            botSay("Now explain it back in your own words ✅\n" + pack.explainBack.prompt);
+            tutorExpected = pack.explainBack;
+            tutorExpectedType = "explainBack";
+          }
+          return;
+        }
+
+        // Explain-back
+        if(/explain-back|explain back/i.test(message)){
+          if(activeTab !== "english"){
+            botSay("Explain-back is mainly for English ✅\nFor Maths, use Quick Quiz.");
+            return;
+          }
+          if(!pack.explainBack){
+            botSay("Let’s do explain-back 💖\nExplain this topic in your own words. Include at least 2 key ideas.");
+            tutorExpected = { mustIncludeAny:["because","rule","example"], niceToIncludeAny:[] };
+            tutorExpectedType = "explainBack";
+            return;
+          }
+          botSay("Explain-back ✅\n" + pack.explainBack.prompt);
+          tutorExpected = pack.explainBack;
+          tutorExpectedType = "explainBack";
+          return;
+        }
+
+        // Quiz
+        if(/quiz|question|test/i.test(message)){
+          if(activeTab !== "maths"){
+            botSay("For English, verification is Explain-back ✅\nTap Explain-back.");
+            return;
+          }
+          if(!pack.quiz){
+            botSay("Quick quiz ✨\n(This topic doesn’t have a built-in quiz yet — we can add one.)");
+            return;
+          }
+          botSay("Quick quiz ✨\n" + pack.quiz.q);
+          botSay("Reply with your answer.");
+          tutorExpected = pack.quiz.a;
+          tutorExpectedType = "quiz";
+          return;
+        }
+
+        // Example
+        if(/example|show me/i.test(message)){
+          botSay(pack.example || "Here’s a simple example: try one step at a time.");
+          return;
+        }
+
+        // Visual
+        if(/visual|draw|picture|diagram/i.test(message)){
+          if(pack.visual) renderVisual(pack.visual);
+          else renderVisual(() => simpleStepsVisual(["What is it?","Key rule","Try example","Check answer"]));
+          return;
+        }
+
+        // Explain
+        if(/explain/i.test(message)){
+          botSay(pack.explain || "Let’s break it down into small steps 💖");
+          return;
+        }
+
+        // Default
+        botSay(pack.explain || "Tell me what part feels tricky 💖");
+      }
+
+      function sendChat(text){
+        const msg = (text ?? (chatInput ? chatInput.value : "")).trim();
+        if(!msg) return;
+        userSay(msg);
+        if(chatInput) chatInput.value = "";
+        handleOffline(msg);
+      }
+
+      // Wire tutor UI
+      on(qExplain, "click", () => sendChat("explain"));
+      on(qExample, "click", () => sendChat("example"));
+      on(qQuiz, "click", () => sendChat("quiz"));
+      on(qExplainBack, "click", () => sendChat("explain-back"));
+      on(qVisual, "click", () => sendChat("show visual"));
+
+      on(sendBtn, "click", () => sendChat());
+      on(chatInput, "keydown", (e) => { if(e.key === "Enter") sendChat(); });
+
+      on(passSupportive, "click", () => setPassMode("supportive"));
+      on(closeTutor, "click", closeTutorPanel);
+
+      on(tutorFab, "click", () => {
+        openTutor();
+        if(chatLog && !chatLog.childElementCount){
+          botSay("Hi Micaela 💖 I’m your tutor!\nTap ‘Take Tutor Quiz’ (Maths) or ‘Explain-back’ (English) on a topic to unlock rewards.\nYou can also tap ‘Take Lesson’ for a mini lesson ✨");
+        }
+      });
+
+      // ====== Topic Cards ======
+      function renderCard(item){
+        const ts = getTopicState(item.id);
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const row1 = document.createElement("div");
+        row1.className = "row1";
+
+        const topic = document.createElement("div");
+        topic.className = "topic";
+        topic.textContent = item.topic;
+
+        const code = document.createElement("div");
+        code.className = "code";
+        code.textContent = item.code || "";
+
+        row1.appendChild(topic);
+        row1.appendChild(code);
+
+        const controls = document.createElement("div");
+        controls.className = "controls";
+
+        const confWrap = document.createElement("div");
+        confWrap.className = "conf";
+        const confLabel = document.createElement("label");
+        confLabel.textContent = "Confidence:";
+        const sel = document.createElement("select");
+        CONF_OPTIONS.forEach(opt => {
+          const o = document.createElement("option");
+          o.value = opt.value;
+          o.textContent = opt.label;
+          sel.appendChild(o);
+        });
+        sel.value = ts.conf;
+        on(sel, "change", () => setTopicState(item.id, { conf: sel.value }));
+        confWrap.appendChild(confLabel);
+        confWrap.appendChild(sel);
+
+        const checks = document.createElement("div");
+        checks.className = "checks";
+        checks.appendChild(checkboxPill("IXL practice done", ts.practice, (val) => setTopicState(item.id, { practice: val })));
+
+        const actions = document.createElement("div");
+        actions.style.display = "flex";
+        actions.style.gap = "10px";
+        actions.style.flexWrap = "wrap";
+        actions.style.justifyContent = "flex-end";
+
+        // Take Lesson
+        const lessonBtn = document.createElement("button");
+        lessonBtn.className = "askBtn";
+        lessonBtn.type = "button";
+        lessonBtn.textContent = "🩷 Take Lesson";
+        on(lessonBtn, "click", () => {
+          setCurrentTopic(item);
+          openTutor();
+          botSay(`Lesson for: ${item.topic} ✨`);
+          sendChat("lesson");
+        });
+
+        // Verification button
+        const askBtn = document.createElement("button");
+        askBtn.className = "askBtn";
+        askBtn.type = "button";
+        askBtn.textContent = activeTab === "maths" ? "🩷 Take Tutor Quiz" : "🩷 Explain-back to Tutor";
+        on(askBtn, "click", () => {
+          setCurrentTopic(item);
+          openTutor();
+          if(activeTab === "maths"){
+            botSay(`Hi Micaela 💖\nTo unlock money for “${item.topic}”, pass the Tutor quiz ✅\nTap Quick Quiz or type: quiz`);
+          } else {
+            botSay(`Hi Micaela 💖\nTo unlock money for “${item.topic}”, explain it back in your own words ✅\nTap Explain-back or type: explain-back`);
+          }
+        });
+
+        actions.appendChild(lessonBtn);
+        actions.appendChild(askBtn);
+
+        controls.appendChild(confWrap);
+        controls.appendChild(checks);
+        controls.appendChild(actions);
+
+        const pills = document.createElement("div");
+        pills.className = "pills";
+
+        const verified = isVerifiedFor(activeTab, ts);
+        const needed = activeTab === "maths" ? "Quiz" : "Explain-back";
+        const unlocked = isUnlocked(activeTab, ts);
+
+        const vChip = document.createElement("span");
+        vChip.className = "chip2";
+        vChip.textContent = verified ? `✅ ${needed} verified` : `🔒 ${needed} not verified`;
+
+        const cChip = document.createElement("span");
+        cChip.className = "chip2";
+        cChip.textContent = (ts.conf === "yes") ? "😄 Confidence set" : "🙂 Set confidence to 😄";
+
+        const uChip = document.createElement("span");
+        uChip.className = "chip2";
+        uChip.textContent = unlocked ? "💰 Reward unlocked" : "⏳ Reward locked";
+
+        pills.appendChild(vChip);
+        pills.appendChild(cChip);
+        pills.appendChild(uChip);
+
+        const earnedRow = document.createElement("div");
+        earnedRow.className = "earnedRow";
+        const earnedAmt = calcEarnedForTopic(activeTab, ts);
+
+        const tag1 = document.createElement("span");
+        tag1.className = "tagEarned";
+        tag1.textContent = `💸 Earned: £${earnedAmt.toFixed(2)}`;
+
+        const tag2 = document.createElement("span");
+        tag2.className = "tagEarned";
+        tag2.textContent = unlocked ? "🌟 Unlocked!" : "⏳ Keep going";
+
+        earnedRow.appendChild(tag1);
+        earnedRow.appendChild(tag2);
+
+        card.appendChild(row1);
+        card.appendChild(controls);
+        card.appendChild(pills);
+        card.appendChild(earnedRow);
+
+        return card;
+      }
+
+      // ====== Stats helpers ======
+      function getAllTopics(){
+        const all = [];
+        Object.keys(DATA).forEach(k => DATA[k].forEach(sec => sec.items.forEach(it => all.push({ ...it, tab:k }))));
+        return all;
+      }
+
+      function getSectionStats(tab, items){
+        let money = 0;
+        let done = 0;
+        items.forEach(it => {
+          const ts = getTopicState(it.id);
+          money += calcEarnedForTopic(tab, ts);
+          if(isUnlocked(tab, ts)) done += 1;
+        });
+        return { money, done };
+      }
+
+      function updateStatsAndProgress(){
+        const all = getAllTopics();
+        let totalMoney = 0;
+        let topicsDone = 0;
+
+        all.forEach(it => {
+          const ts = getTopicState(it.id);
+          totalMoney += calcEarnedForTopic(it.tab, ts);
+          if(isUnlocked(it.tab, ts)) topicsDone += 1;
+        });
+
+        const totalMoneyEl = document.getElementById("totalMoney");
+        const topicsDoneEl = document.getElementById("topicsDone");
+        if(totalMoneyEl) totalMoneyEl.textContent = `£${totalMoney.toFixed(2)}`;
+        if(topicsDoneEl) topicsDoneEl.textContent = `${topicsDone}`;
+
+        const visible = [];
+        DATA[activeTab].forEach(sec => sec.items.forEach(it => {
+          if(!searchText) { visible.push(it); return; }
+          const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
+          if(hay.includes(searchText)) visible.push(it);
+        }));
+
+        const totalVisible = visible.length || 1;
+        let doneVisible = 0;
+        visible.forEach(it => {
+          const ts = getTopicState(it.id);
+          if(isUnlocked(activeTab, ts)) doneVisible += 1;
+        });
+
+        const pct = Math.round((doneVisible / totalVisible) * 100);
+        const fill = document.getElementById("progressFill");
+        const pctEl = document.getElementById("progressPct");
+        if(fill) fill.style.width = `${pct}%`;
+        if(pctEl) pctEl.textContent = `${pct}%`;
+      }
+
+      // ====== Export / Import / Reset ======
+      const resetBtn = document.getElementById("resetBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const importBtn = document.getElementById("importBtn");
+
+      on(resetBtn, "click", () => {
+        if(!confirm("Reset ALL progress? This will clear practice, confidence, and tutor verification.")) return;
+        state = {};
         saveState(state);
         render();
-        alert("Imported! 🎉");
-      }catch(e){
-        alert("Sorry — that file didn’t look like a valid export.");
+      });
+
+      on(exportBtn, "click", () => {
+        const payload = {
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          reward: REWARD,
+          state
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "micaela-checklist-progress.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      on(importBtn, "click", async () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if(!file) return;
+          const text = await file.text();
+          try{
+            const parsed = JSON.parse(text);
+            if(!parsed || typeof parsed !== "object" || !parsed.state) throw new Error("Invalid file");
+            state = parsed.state || {};
+            saveState(state);
+            render();
+            alert("Imported! 🎉");
+          }catch(e){
+            alert("Sorry — that file didn’t look like a valid export.");
+          }
+        };
+        input.click();
+      });
+
+      // ====== SAFE SELF TESTS (NEVER BREAK UI) ======
+      function assert(condition, message){
+        if(!condition) throw new Error(message);
       }
-    };
-    input.click();
-  });
 
-  /* ---------- SAFE SELF TESTS (NEVER BREAK UI) ---------- */
-  function assert(condition, message){
-    if(!condition) throw new Error(message);
-  }
+      function runSelfTestsSafe(){
+        try{
+          render();
+          assert(document.querySelectorAll("details.section").length > 0, "render should create at least one section");
+          assert(on(null, "click", () => {}) === false, "on() should return false for null");
+          const anyLesson = Array.from(document.querySelectorAll("button.askBtn")).some(b => (b.textContent || "").toLowerCase().includes("lesson"));
+          assert(anyLesson, "Lesson button should exist on topic cards");
+          console.log("✅ Self-tests passed");
+        }catch(e){
+          console.warn("⚠️ Self-tests failed (non-fatal):", e.message || e);
+        }
+      }
 
-  function runSelfTestsSafe(){
-    try{
+      if(new URLSearchParams(location.search).get("test") === "1"){
+        runSelfTestsSafe();
+      }
+
+      // Initial render (always)
+      setPassMode("supportive");
       render();
-      assert(document.querySelectorAll("details.section").length > 0, "render should create at least one section");
-      assert(on(null, "click", () => {}) === false, "on() should return false for null");
-      // lesson button exists in a rendered card
-      const anyLesson = document.querySelector(".askBtn")?.textContent?.includes("Lesson") || !!document.querySelector("button.askBtn");
-      assert(anyLesson, "Lesson button should exist on topic cards");
-      console.log("✅ Self-tests passed");
-    }catch(e){
-      console.warn("⚠️ Self-tests failed (non-fatal):", e.message || e);
-    }
-  }
 
-  if(new URLSearchParams(location.search).get("test") === "1"){
-    runSelfTestsSafe();
-  }
-
-  // Initial render (always)
-  setPassMode("supportive");
-  render();
-
-});
-</script>
+    });
+  </script>
 </body>
 </html>
