@@ -1176,7 +1176,8 @@ Tiny steps:
       }
 
       function nowISO(){
-        try { return new Date().toISOString(); } catch { return ""; }
+        try { return new Date().toISOString(); } catch(e){ return ""; }
+      } catch { return ""; }
       }
 
       function buildAiMessage(userText){
@@ -1401,7 +1402,7 @@ I may ask you to add a quick example.`);
       }
 
       function placeValueVisual(n){
-        const s = String(n ?? 345);
+        const s = String((n===undefined || n===null) ? 345 : n);
         const digits = s.split("").map(d=>escapeHTML(d));
         const labels = ["Millions","Hundred-thousands","Ten-thousands","Thousands","Hundreds","Tens","Ones"];
 
