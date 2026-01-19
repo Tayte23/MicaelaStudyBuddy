@@ -1176,7 +1176,8 @@ Tiny steps:
       }
 
       function nowISO(){
-        try { return new Date().toISOString(); } catch(e){ return ""; }
+        // Simple + safe (avoids rare parsing issues on some minifiers)
+        return new Date().toISOString();
       }
 
       function buildAiMessage(userText){
