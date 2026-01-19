@@ -1272,7 +1272,9 @@ Learner says: ${userText}`;
         passMode = next;
         if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
         if(passMode === "supportive"){
-          botSay("A Mode ✅\nI will be kind and accept "close enough" if your understanding is clear 💖\nI may ask you to add a quick example.");
+          botSay('A Mode ✅
+I will be kind and accept "close enough" if your understanding is clear 💖
+I may ask you to add a quick example.');
         }
       }
 
@@ -1377,7 +1379,7 @@ Learner says: ${userText}`;
       // ============================
       function escapeHTML(str){
         return String(str || "").replace(/[&<>"']/g, (c)=>({
-          "&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;"
+          "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
         }[c]));
       }
 
@@ -1399,25 +1401,34 @@ Learner says: ${userText}`;
         const s = String(n ?? 345);
         const digits = s.split("").map(d=>escapeHTML(d));
         const labels = ["Millions","Hundred-thousands","Ten-thousands","Thousands","Hundreds","Tens","Ones"];
-        const padded = Array(Math.max(7, digits.length)).fill("");
-        for(let i=0;i<digits.length;i++) padded[padded.length-digits.length+i] = digits[i];
-        const cols = labels.slice(labels.length - padded.length);
 
-        const head = `<tr>${cols.map(c=>`<th style="padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);">${escapeHTML(c)}</th>`).join("")}</tr>`;
-        const row = `<tr>${padded.map(d=>`<td style="text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;">${d || "&nbsp;"}</td>`).join("")}</tr>`;
+        // pad to 7 columns
+        const padded = Array(7).fill("");
+        for(let i=0;i<Math.min(7,digits.length);i++){
+          padded[7 - Math.min(7,digits.length) + i] = digits[digits.length - Math.min(7,digits.length) + i];
+        }
+        const cols = labels;
 
-        return visualCard("Place Value Chart", `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-            ${pill(`Example number: ${s}`)}
-            ${pill("Read it by place")}
-          </div>
-          <table style="width:100%;border-collapse:collapse;border:1px solid rgba(26,18,48,.10);border-radius:14px;overflow:hidden;">
-            ${head}${row}
-          </table>
-          <div style="margin-top:8px;font-size:12px;opacity:.9;line-height:1.35;">
-            Tip: Start on the left. Say the <b>place</b> name, then the <b>digit</b>.
-          </div>
-        `);
+        const head = '<tr>' + cols.map(c => (
+          '<th style="padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);">' + escapeHTML(c) + '</th>'
+        )).join("") + '</tr>';
+
+        const row = '<tr>' + padded.map(d => (
+          '<td style="text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;">' + (d || '&nbsp;') + '</td>'
+        )).join("") + '</tr>';
+
+        return visualCard('Place Value Chart',
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+            + pill('Example number: ' + s)
+            + pill('Read it by place')
+          + '</div>'
+          + '<table style="width:100%;border-collapse:collapse;border:1px solid rgba(26,18,48,.10);border-radius:14px;overflow:hidden;">'
+            + head + row
+          + '</table>'
+          + '<div style="margin-top:8px;font-size:12px;opacity:.9;line-height:1.35;">'
+            + 'Tip: Start on the left. Say the <b>place</b> name, then the <b>digit</b>.'
+          + '</div>'
+        );
       }
 
       function numberLineVisual(a=0,b=10,mark=6){
