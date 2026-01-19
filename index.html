@@ -545,14 +545,14 @@
           <div class="pill" title="Total money earned from tutor-verified topics">
             <div>💰</div>
             <div>
-              <div class="tiny">Total earned</div>
-              <div class="money" id="totalMoney">£0.00</div>
+              <div class="tiny">Maths earned (this month)</div>
+              <div class="money" id="totalMoney">£0.00 / £25.00<\/div>
             </div>
           </div>
           <div class="pill" title="Topics unlocked (verified + 😄)">
             <div>✅</div>
             <div>
-              <div class="tiny">Topics unlocked</div>
+              <div class="tiny">Topics unlocked (all)</div>
               <div class="money" id="topicsDone">0</div>
             </div>
           </div>
@@ -624,13 +624,14 @@
       <div class="tutorFab" id="tutorFab">🩷 Tutor</div>
 
       <div class="footer">
-        <strong>Money rules (your strongest split):</strong>
+        <strong>Money rules (strict + fair, CGP standard):</strong>
         <ul>
-          <li><strong>Maths</strong>: Tutor quiz must be passed ✅ + Confidence is 😄</li>
-          <li><strong>English</strong>: Explain-back must be passed ✅ + Confidence is 😄</li>
+          <li><strong>Maths</strong>: Money unlocks <strong>only</strong> when the Tutor verifies you’ve met the CGP standard (Quiz passed ✅).</li>
+          <li><strong>Monthly Maths allowance</strong>: up to <strong>£25</strong> per month (shown at the top). It’s spread across a monthly target of topics to finish by <strong>31 March</strong>.</li>
+          <li><strong>English</strong>: still uses Explain-back verification for “Topics unlocked”, but no money pot here.</li>
           <li>IXL practice tick is just a habit marker (does not award money).</li>
         </ul>
-        Per topic: <strong>£1.25</strong> for verification + <strong>£0.25</strong> confidence bonus → max <strong>£1.50</strong>.
+        This month: <strong>£<span id="rewardPerTopic">0.00</span></strong> per verified Maths topic, capped at <strong>£<span id="monthlyPot">25.00</span></strong>.
       </div>
     </div>
   </div>
@@ -641,119 +642,70 @@
   <script>
     window.DATA = window.DATA || {
   maths: [
-    { section: "Number & Place Value", items: [
-      { id: "m-npv-01", topic: "Read, write and compare numbers up to 10,000,000", code: "N" },
-      { id: "m-npv-02", topic: "Place value (up to millions)", code: "N" },
-      { id: "m-npv-03", topic: "Powers of 10 (10, 100, 1,000…) and scaling", code: "N" },
-      { id: "m-npv-04", topic: "Count forwards/backwards in steps (incl. decimals)", code: "N" },
-      { id: "m-npv-05", topic: "Multiples, factors and prime numbers", code: "N" },
-      { id: "m-npv-06", topic: "Common factors and common multiples", code: "N" },
-      { id: "m-npv-07", topic: "Rounding to nearest 10/100/1000/10,000/100,000", code: "N" },
-      { id: "m-npv-08", topic: "Estimate and check answers", code: "N" },
-      { id: "m-npv-09", topic: "Negative numbers (order, calculate, real life)", code: "N" },
-      { id: "m-npv-10", topic: "Roman numerals to 1,000 (I–M)", code: "N" },
-      { id: "m-npv-11", topic: "Sequences (including patterns)", code: "N" }
+    { section: "Section 1 — Number & Place Value", items: [
+      { id: "m-s1-01", topic: "Ordering Numbers", code: "S1" },
+      { id: "m-s1-02", topic: "Negative Numbers", code: "S1" },
+      { id: "m-s1-03", topic: "Roman Numerals", code: "S1" },
+      { id: "m-s1-04", topic: "Decimals", code: "S1" },
+      { id: "m-s1-05", topic: "Rounding", code: "S1" }
     ]},
 
-    { section: "Calculations (4 Operations)", items: [
-      { id: "m-calc-01", topic: "Add and subtract whole numbers (multi-digit)", code: "C" },
-      { id: "m-calc-02", topic: "Add and subtract decimals (up to 2/3 dp)", code: "C" },
-      { id: "m-calc-03", topic: "Multiply up to 4-digit by 1- and 2-digit", code: "C" },
-      { id: "m-calc-04", topic: "Multiply decimals by whole numbers", code: "C" },
-      { id: "m-calc-05", topic: "Short division", code: "C" },
-      { id: "m-calc-06", topic: "Long division (remainders)", code: "C" },
-      { id: "m-calc-07", topic: "Long division (remainders as fractions/decimals)", code: "C" },
-      { id: "m-calc-08", topic: "Order of operations (BIDMAS basics)", code: "C" },
-      { id: "m-calc-09", topic: "Solve missing number problems", code: "C" }
+    { section: "Section 2 — Calculations", items: [
+      { id: "m-s2-01", topic: "Written Addition and Subtraction", code: "S2" },
+      { id: "m-s2-02", topic: "Written Multiplication", code: "S2" },
+      { id: "m-s2-03", topic: "Written Division", code: "S2" },
+      { id: "m-s2-04", topic: "Multiplying and Dividing by 10, 100 & 1000", code: "S2" },
+      { id: "m-s2-05", topic: "Multiplying and Dividing with Decimals", code: "S2" },
+      { id: "m-s2-06", topic: "Order of Operations", code: "S2" },
+      { id: "m-s2-07", topic: "Estimating and Inverses", code: "S2" },
+      { id: "m-s2-08", topic: "Multiples and Factors", code: "S2" },
+      { id: "m-s2-09", topic: "Prime Numbers", code: "S2" },
+      { id: "m-s2-10", topic: "Square and Cube Numbers", code: "S2" }
     ]},
 
-    { section: "Fractions", items: [
-      { id: "m-frac-01", topic: "Equivalent fractions and simplifying", code: "F" },
-      { id: "m-frac-02", topic: "Compare and order fractions", code: "F" },
-      { id: "m-frac-03", topic: "Fractions on a number line", code: "F" },
-      { id: "m-frac-04", topic: "Add and subtract fractions (same denominator)", code: "F" },
-      { id: "m-frac-05", topic: "Add and subtract fractions (different denominators)", code: "F" },
-      { id: "m-frac-06", topic: "Mixed numbers and improper fractions", code: "F" },
-      { id: "m-frac-07", topic: "Multiply fractions by whole numbers", code: "F" },
-      { id: "m-frac-08", topic: "Find fractions of amounts", code: "F" }
+    { section: "Section 3 — Fractions, Decimals & Percentages", items: [
+      { id: "m-s3-01", topic: "Fractions", code: "S3" },
+      { id: "m-s3-02", topic: "Comparing Fractions", code: "S3" },
+      { id: "m-s3-03", topic: "Multiplying Fractions", code: "S3" },
+      { id: "m-s3-04", topic: "Adding and Subtracting Fractions", code: "S3" },
+      { id: "m-s3-05", topic: "Dividing Fractions", code: "S3" },
+      { id: "m-s3-06", topic: "Equivalent Fractions and Decimals", code: "S3" },
+      { id: "m-s3-07", topic: "Fractions, Decimals and Percentages", code: "S3" }
     ]},
 
-    { section: "Decimals", items: [
-      { id: "m-dec-01", topic: "Place value in decimals (tenths, hundredths, thousandths)", code: "D" },
-      { id: "m-dec-02", topic: "Compare and order decimals", code: "D" },
-      { id: "m-dec-03", topic: "Round decimals (1 dp, 2 dp)", code: "D" },
-      { id: "m-dec-04", topic: "Convert fractions to decimals (common ones)", code: "D" },
-      { id: "m-dec-05", topic: "Add and subtract decimals", code: "D" },
-      { id: "m-dec-06", topic: "Multiply/divide by 10, 100, 1000", code: "D" }
+    { section: "Section 4 — Ratio, Proportion & Algebra", items: [
+      { id: "m-s4-01", topic: "Ratio, Proportion and Unequal Sharing", code: "S4" },
+      { id: "m-s4-02", topic: "Scaling", code: "S4" },
+      { id: "m-s4-03", topic: "Percentage Problems", code: "S4" },
+      { id: "m-s4-04", topic: "Formulas and Combinations", code: "S4" },
+      { id: "m-s4-05", topic: "Finding Missing Numbers", code: "S4" },
+      { id: "m-s4-06", topic: "Number Sequences", code: "S4" }
     ]},
 
-    { section: "Percentages", items: [
-      { id: "m-perc-01", topic: "Understand percent as ‘out of 100’", code: "P" },
-      { id: "m-perc-02", topic: "Percentages of amounts (10%, 25%, 50%, 75%)", code: "P" },
-      { id: "m-perc-03", topic: "Percentages of amounts (any %)", code: "P" },
-      { id: "m-perc-04", topic: "Percent, fraction and decimal equivalences", code: "P" },
-      { id: "m-perc-05", topic: "Percentage increase/decrease (basic)", code: "P" }
+    { section: "Section 5 — Measure", items: [
+      { id: "m-s5-01", topic: "Units and Conversion", code: "S5" },
+      { id: "m-s5-02", topic: "Time and Money", code: "S5" },
+      { id: "m-s5-03", topic: "Area", code: "S5" },
+      { id: "m-s5-04", topic: "Perimeters and Areas", code: "S5" },
+      { id: "m-s5-05", topic: "Areas of Triangles and Parallelograms", code: "S5" },
+      { id: "m-s5-06", topic: "Volume", code: "S5" }
     ]},
 
-    { section: "Ratio & Proportion", items: [
-      { id: "m-ratio-01", topic: "Write and simplify ratios", code: "RP" },
-      { id: "m-ratio-02", topic: "Solve ratio sharing problems", code: "RP" },
-      { id: "m-ratio-03", topic: "Scale factors (enlargement/reduction)", code: "RP" },
-      { id: "m-ratio-04", topic: "Proportion problems (recipes, maps)", code: "RP" }
+    { section: "Section 6 — Geometry", items: [
+      { id: "m-s6-01", topic: "Angle Rules", code: "S6" },
+      { id: "m-s6-02", topic: "Drawing 2D Shapes", code: "S6" },
+      { id: "m-s6-03", topic: "Properties of Shapes", code: "S6" },
+      { id: "m-s6-04", topic: "Angles in Shapes", code: "S6" },
+      { id: "m-s6-05", topic: "3D Shapes", code: "S6" },
+      { id: "m-s6-06", topic: "Coordinates", code: "S6" },
+      { id: "m-s6-07", topic: "Reflection and Translation", code: "S6" }
     ]},
 
-    { section: "Algebra", items: [
-      { id: "m-alg-01", topic: "Use simple formulae", code: "A" },
-      { id: "m-alg-02", topic: "Find unknowns (missing numbers) with symbols", code: "A" },
-      { id: "m-alg-03", topic: "Generate and describe sequences", code: "A" },
-      { id: "m-alg-04", topic: "One-step equations (e.g., □ + 7 = 20)", code: "A" }
-    ]},
-
-    { section: "Measurement", items: [
-      { id: "m-meas-01", topic: "Convert units (mm/cm/m/km)", code: "M" },
-      { id: "m-meas-02", topic: "Convert units (g/kg) and (ml/l)", code: "M" },
-      { id: "m-meas-03", topic: "Perimeter", code: "M" },
-      { id: "m-meas-04", topic: "Area of rectangles (and simple compound shapes)", code: "M" },
-      { id: "m-meas-05", topic: "Volume of cubes/cuboids (counting cubes)", code: "M" },
-      { id: "m-meas-06", topic: "Money problems (change, totals, best buys)", code: "M" },
-      { id: "m-meas-07", topic: "Time: read clocks + convert units", code: "M" },
-      { id: "m-meas-08", topic: "Time: 24-hour clock", code: "M" },
-      { id: "m-meas-09", topic: "Time: timetables", code: "M" },
-      { id: "m-meas-10", topic: "Speed = distance ÷ time (basic)", code: "M" }
-    ]},
-
-    { section: "Geometry: Properties of Shape", items: [
-      { id: "m-geom-01", topic: "Recognise and name 2D and 3D shapes", code: "G" },
-      { id: "m-geom-02", topic: "Properties of 2D/3D shapes (faces, edges, vertices)", code: "G" },
-      { id: "m-geom-03", topic: "Angles: measure and draw", code: "G" },
-      { id: "m-geom-04", topic: "Angles on a straight line (sum 180°)", code: "G" },
-      { id: "m-geom-05", topic: "Angles around a point (sum 360°)", code: "G" },
-      { id: "m-geom-06", topic: "Angles in triangles (sum 180°)", code: "G" },
-      { id: "m-geom-07", topic: "Angles in quadrilaterals (sum 360°)", code: "G" },
-      { id: "m-geom-08", topic: "Parallel and perpendicular lines", code: "G" }
-    ]},
-
-    { section: "Geometry: Position & Direction", items: [
-      { id: "m-pos-01", topic: "Coordinates (all four quadrants)", code: "PD" },
-      { id: "m-pos-02", topic: "Read and plot coordinates", code: "PD" },
-      { id: "m-pos-03", topic: "Translation", code: "PD" },
-      { id: "m-pos-04", topic: "Reflection", code: "PD" },
-      { id: "m-pos-05", topic: "Rotation", code: "PD" }
-    ]},
-
-    { section: "Statistics", items: [
-      { id: "m-stat-01", topic: "Read and interpret tables", code: "S" },
-      { id: "m-stat-02", topic: "Bar charts", code: "S" },
-      { id: "m-stat-03", topic: "Line graphs", code: "S" },
-      { id: "m-stat-04", topic: "Pie charts (basic reading)", code: "S" },
-      { id: "m-stat-05", topic: "Mean average (basic)", code: "S" }
-    ]},
-
-    { section: "Problem Solving & Reasoning", items: [
-      { id: "m-ps-01", topic: "Multi-step word problems", code: "PS" },
-      { id: "m-ps-02", topic: "Choose the correct operation", code: "PS" },
-      { id: "m-ps-03", topic: "Explain your method (reasoning)", code: "PS" },
-      { id: "m-ps-04", topic: "Check answers using inverse operations", code: "PS" }
+    { section: "Section 7 — Statistics", items: [
+      { id: "m-s7-01", topic: "Tables and Pictograms", code: "S7" },
+      { id: "m-s7-02", topic: "Bar Charts and Line Graphs", code: "S7" },
+      { id: "m-s7-03", topic: "Pie Charts", code: "S7" },
+      { id: "m-s7-04", topic: "The Mean", code: "S7" }
     ]}
   ],
 
@@ -865,7 +817,42 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
       }
 
       // ====== REWARD SETTINGS ======
-      const REWARD = { verified: 1.25, confidentBonus: 0.25 };
+      // ====== REWARD SETTINGS (CGP strict) ======
+      // Micaela earns up to £25 per month for MATHS only, unlocked only after a CGP-level Tutor check (quiz passed).
+      // We spread the £25 across a monthly target number of topics so the total can reach (but never exceed) £25.
+      const MONTHLY_MATH_POT = 25;
+      const TARGET_FINISH_DATE = "2026-03-31"; // finish all Maths topics by 31 March
+
+      function countMathTopics(){
+        try{
+          if(!DATA || !DATA.maths) return 0;
+          return DATA.maths.reduce((sum, sec) => sum + ((sec && sec.items) ? sec.items.length : 0), 0);
+        }catch(e){
+          return 0;
+        }
+      }
+
+      function monthsInclusiveToTarget(){
+        try{
+          const now = new Date();
+          const end = new Date(TARGET_FINISH_DATE + "T23:59:59");
+          if(isNaN(end.getTime())) return 1;
+          const y1 = now.getFullYear(), m1 = now.getMonth();
+          const y2 = end.getFullYear(), m2 = end.getMonth();
+          const diff = (y2 - y1) * 12 + (m2 - m1);
+          return Math.max(1, diff + 1); // inclusive of current month
+        }catch(e){
+          return 1;
+        }
+      }
+
+      const TOTAL_MATH_TOPICS = countMathTopics();
+      const MONTHS_LEFT = monthsInclusiveToTarget();
+      const MONTHLY_TARGET_TOPICS = Math.max(1, Math.ceil(TOTAL_MATH_TOPICS / MONTHS_LEFT));
+      const MATH_REWARD_PER_TOPIC = +(MONTHLY_MATH_POT / MONTHLY_TARGET_TOPICS).toFixed(2);
+
+      // English has no money pot here (Maths only), but still uses verification for “Topics unlocked”.
+      const REWARD = { mathsPerTopic: MATH_REWARD_PER_TOPIC, monthlyMathPot: MONTHLY_MATH_POT };
 
       // ====== Confidence Options ======
       const CONF_OPTIONS = [
@@ -924,10 +911,14 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
         return isVerifiedFor(tab, ts) && ts.conf === "yes";
       }
       function calcEarnedForTopic(tab, ts){
+        // STRICT + FAIR (CGP):
+        // - Money is for MATHS only.
+        // - Money unlocks ONLY after CGP-level Tutor verification (Maths quiz verified).
+        // - Confidence is still used for “Topics unlocked”, but NOT required to count money.
+        // - Monthly cap is enforced in updateStatsAndProgress.
+        if(tab !== "maths") return 0;
         if(!isVerifiedFor(tab, ts)) return 0;
-        let money = REWARD.verified;
-        if(ts.conf === "yes") money += REWARD.confidentBonus;
-        return money;
+        return REWARD.mathsPerTopic;
       }
 
       // ====== UI Rendering ======
@@ -1042,11 +1033,11 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
       }
 
       function nowISO(){
-        try { return new Date().toISOString(); } catch { return ""; }
+        try { return new Date().toISOString(); } catch(e){ return ""; }
       }
 
       function buildAiMessage(userText){
-        const topic = currentTopic?.topic ? `Topic: ${currentTopic.topic}` : "Topic: (none selected)";
+        const topic = (currentTopic && currentTopic.topic) ? `Topic: ${currentTopic.topic}` : "Topic: (none selected)";
         const subject = activeTab || "maths";
         return `Subject: ${subject}
 ${topic}
@@ -1067,7 +1058,7 @@ Learner says: ${userText}`;
 
       function updateTutorStatus(){
         if(!tutorTopicEl) return;
-        const base = currentTopic?.topic ? `Topic: ${currentTopic.topic}` : "Topic: (tap a topic card)";
+        const base = (currentTopic && currentTopic.topic) ? `Topic: ${currentTopic.topic}` : "Topic: (tap a topic card)";
         const status = aiBusy ? "🟣 AI: thinking…" : (aiOnline && navigator.onLine ? "🟣 AI: on" : "🔵 Offline: on");
         tutorTopicEl.textContent = `${base} • ${status}`;
       }
@@ -1246,8 +1237,9 @@ Learner says: ${userText}`;
 
       function markVerified(){
         if(!currentTopic) return;
-        if(activeTab === "maths") setTopicState(currentTopic.id, { quizOk:true });
-        else setTopicState(currentTopic.id, { explainOk:true });
+        const stamp = nowISO();
+        if(activeTab === "maths") setTopicState(currentTopic.id, { quizOk:true, verifiedAt: stamp });
+        else setTopicState(currentTopic.id, { explainOk:true, verifiedAt: stamp });
       }
 
       function handleOffline(message){
@@ -1529,7 +1521,7 @@ Learner says: ${userText}`;
 
         const vChip = document.createElement("span");
         vChip.className = "chip2";
-        vChip.textContent = verified ? `✅ ${needed} verified` : `🔒 ${needed} not verified`;
+        vChip.textContent = verified ? `✅ CGP check passed` : `🔒 CGP check not passed`;
 
         const cChip = document.createElement("span");
         cChip.className = "chip2";
@@ -1537,7 +1529,7 @@ Learner says: ${userText}`;
 
         const uChip = document.createElement("span");
         uChip.className = "chip2";
-        uChip.textContent = unlocked ? "💰 Reward unlocked" : "⏳ Reward locked";
+        uChip.textContent = verified ? "💰 Money counts" : "⏳ Money locked";
 
         pills.appendChild(vChip);
         pills.appendChild(cChip);
@@ -1553,7 +1545,7 @@ Learner says: ${userText}`;
 
         const tag2 = document.createElement("span");
         tag2.className = "tagEarned";
-        tag2.textContent = unlocked ? "🌟 Unlocked!" : "⏳ Keep going";
+        tag2.textContent = verified ? "✅ Verified (CGP)" : "⏳ Not verified yet";
 
         earnedRow.appendChild(tag1);
         earnedRow.appendChild(tag2);
@@ -1586,20 +1578,87 @@ Learner says: ${userText}`;
 
       function updateStatsAndProgress(){
         const all = getAllTopics();
-        let totalMoney = 0;
-        let topicsDone = 0;
+        let lifetimeTopicsUnlocked = 0;
+
+        // Monthly Maths earnings (capped)
+        let mathsVerifiedThisMonth = 0;
+        let mathsMoneyThisMonth = 0;
+
+        const now = new Date();
+        const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
 
         all.forEach(it => {
           const ts = getTopicState(it.id);
-          totalMoney += calcEarnedForTopic(it.tab, ts);
-          if(isUnlocked(it.tab, ts)) topicsDone += 1;
+          if(isUnlocked(it.tab, ts)) lifetimeTopicsUnlocked += 1;
+
+          if(it.tab === "maths" && isVerifiedFor("maths", ts)){
+            const at = ts.verifiedAt ? String(ts.verifiedAt) : "";
+            const sameMonth = at.startsWith(ym);
+            if(sameMonth) mathsVerifiedThisMonth += 1;
+          }
         });
+
+        mathsMoneyThisMonth = Math.min(REWARD.monthlyMathPot, mathsVerifiedThisMonth * REWARD.mathsPerTopic);
 
         const totalMoneyEl = document.getElementById("totalMoney");
         const topicsDoneEl = document.getElementById("topicsDone");
-        if(totalMoneyEl) totalMoneyEl.textContent = `£${totalMoney.toFixed(2)}`;
-        if(topicsDoneEl) topicsDoneEl.textContent = `${topicsDone}`;
+        const rpt = document.getElementById("rewardPerTopic");
+        const mp = document.getElementById("monthlyPot");
 
+        if(totalMoneyEl) totalMoneyEl.textContent = `£${mathsMoneyThisMonth.toFixed(2)} / £${REWARD.monthlyMathPot.toFixed(2)}`;
+        if(topicsDoneEl) topicsDoneEl.textContent = `${lifetimeTopicsUnlocked}`;
+        if(rpt) rpt.textContent = REWARD.mathsPerTopic.toFixed(2);
+        if(mp) mp.textContent = REWARD.monthlyMathPot.toFixed(2);
+
+        // Progress bar stays as “visible topics completed” for the current tab
+        const visible = [];
+        DATA[activeTab].forEach(sec => sec.items.forEach(it => {
+          if(!searchText) { visible.push(it); return; }
+          const hay = (it.topic + " " + (it.code||"") + " " + sec.section).toLowerCase();
+          if(hay.includes(searchText)) visible.push(it);
+        }));
+
+        const totalVisible = visible.length || 1;
+        let doneVisible = 0;
+        visible.forEach(it => {
+          const ts = getTopicState(it.id);
+          if(isUnlocked(activeTab, ts)) doneVisible += 1;
+        });
+
+        const pct = Math.round((doneVisible / totalVisible) * 100);
+        const fill = document.getElementById("progressFill");
+        const pctEl = document.getElementById("progressPct");
+        if(fill) fill.style.width = `${pct}%`;
+        if(pctEl) pctEl.textContent = `${pct}%`;
+      }
+
+      // ====== Stats helpers ======
+      function getAllTopics(){
+        const all = [];
+        Object.keys(DATA).forEach(k => DATA[k].forEach(sec => sec.items.forEach(it => all.push({ ...it, tab:k }))));
+        return all;
+      }
+
+      function getSectionStats(tab, items){
+        let money = 0;
+        let done = 0;
+        items.forEach(it => {
+          const ts = getTopicState(it.id);
+          money += calcEarnedForTopic(tab, ts);
+          if(isUnlocked(tab, ts)) done += 1;
+        });
+        return { money, done };
+      }
+
+      // NOTE: updateStatsAndProgress is called after render() and on state changes.
+      // (We redefined it above to also update footer values.)
+
+      // Original helper functions below are kept as-is where referenced elsewhere.
+
+      // ====== Export / Import / Reset ======
+        if(topicsDoneEl) topicsDoneEl.textContent = `${lifetimeTopicsUnlocked}`;
+
+        // Progress bar stays as “visible topics completed” for the current tab
         const visible = [];
         DATA[activeTab].forEach(sec => sec.items.forEach(it => {
           if(!searchText) { visible.push(it); return; }
