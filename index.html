@@ -1388,11 +1388,22 @@ Learner says: ${userText}`;
         return visualCard("Learning Map", simpleStepsVisual(["What is it?","Key rule","Try 1 example","Quick check"]));
       }
 
+      let justShowedVisual = false;
+
       function maybeAutoVisual(){
         if(!currentTopic) return;
         // Only show an auto-visual if the user is learning (not during verification)
         if(tutorExpectedType) return;
+        // If we already showed a visual for this button-click, don’t spam a second one.
+        if(justShowedVisual){ justShowedVisual = false; return; }
         renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
+      }
+
+      function showVisualNow(){
+        if(!ensureTopicSelected()) return false;
+        justShowedVisual = true;
+        renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
+        return true;
       }
 
       let tutorExpected = null;
@@ -1543,6 +1554,7 @@ Learner says: ${userText}`;
 
         // If user asked for a visual, show it instantly (no waiting) ✅
         if(/(show visual|visual|diagram|draw|picture)/i.test(msg)){
+
           if(!ensureTopicSelected()) return;
           botSay("Okay 💖 Here’s a visual to help your brain see it!");
           renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
@@ -1580,22 +1592,19 @@ Learner says: ${userText}`;
           handleOffline(msg);
         }
       }
-          setBusy(false);
-          updateTutorStatus();
-        }catch(e){
-          setBusy(false);
-          aiOnline = false;
-          updateTutorStatus();
-          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.\n(You can keep learning — it still works!)");
-          console.warn("AI fallback:", e);
-          handleOffline(msg);
-        }
-      }
 
       // Wire tutor UI
-      on(qExplain, "click", () => sendChat("explain"));
-      on(qExample, "click", () => sendChat("example"));
-      on(qQuiz, "click", () => sendChat("quiz"));
+      function runQuickAction(kind){
+        // Option B ✅: auto-show a visual for Explain / Example / Quiz clicks
+        if(["explain","example","quiz"].includes(kind)){
+          showVisualNow();
+        }
+        sendChat(kind);
+      }
+
+      on(qExplain, "click", () => runQuickAction("explain"));
+      on(qExample, "click", () => runQuickAction("example"));
+      on(qQuiz, "click", () => runQuickAction("quiz"));
       on(qExplainBack, "click", () => sendChat("explain-back"));
       on(qVisual, "click", () => sendChat("show visual"));
 
