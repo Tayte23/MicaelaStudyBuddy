@@ -538,7 +538,7 @@
       <div class="topline">
         <div class="brand">
           <h1>✨ Micaela’s KS2 Power Checklist ✨</h1>
-          <p>Money unlocks only after Tutor checks understanding + Confidence 😄 (Maths = Quiz, English = Explain-back) 💖</p>
+          <p>Money unlocks only after Tutor checks understanding + Confidence 😄 (Maths = Quiz, English = Explain-back) 💖 <span style="font-weight:900;opacity:.75;">• Build: <span id="buildTag">2026-01-19-01</span></span></p>
         </div>
 
         <div class="pillrow">
@@ -1160,6 +1160,9 @@ Tiny steps:
 
       // ---- AI backend (Cloudflare Worker) ----
       // If you ever change your Worker name, update these two URLs.
+      const APP_BUILD = "2026-01-19-01"; // bump this to confirm GitHub Pages deployed the latest file
+      console.log("✅ MicaelaStudyBuddy build:", APP_BUILD);
+
       const AI_BACKEND_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/api/chat";
       const AI_HEALTH_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/health";
       const AI_MAX_HISTORY = 10; // keep it small to reduce token usage
@@ -1272,9 +1275,9 @@ Learner says: ${userText}`;
         passMode = next;
         if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
         if(passMode === "supportive"){
-          botSay('A Mode ✅
+          botSay(`A Mode ✅
 I will be kind and accept "close enough" if your understanding is clear 💖
-I may ask you to add a quick example.');
+I may ask you to add a quick example.`);
         }
       }
 
@@ -1728,8 +1731,8 @@ I may ask you to add a quick example.');
           setBusy(false);
           aiOnline = false;
           updateTutorStatus();
-          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
-(You can keep learning — it still works!)");
+          botSay("🔵 I can't reach AI right now, so I'm switching to Offline Tutor.
+(You can keep learning - it still works!)");
           console.warn("AI fallback:", e);
           handleOffline(msg);
         }
@@ -1992,7 +1995,7 @@ I may ask you to add a quick example.');
             render();
             alert("Imported! 🎉");
           }catch(e){
-            alert("Sorry — that file didn’t look like a valid export.");
+            alert("Sorry - that file didn't look like a valid export.");
           }
         };
         input.click();
