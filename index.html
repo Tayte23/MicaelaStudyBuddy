@@ -828,27 +828,158 @@
   ]
 };
 
-window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
-      "Counting in multiples (input/output tables)": {
-        explain: "We follow a rule each time. Example rule: +7 means add 7 each step.",
-        example: "Rule is +7. If input is 9, output is 16.",
-        quiz: { q: "Rule is +7. If input is 9, what is output?", a: "16" },
-        explainBack: {
-          prompt: "Explain what an input/output table is and how you use the rule.",
-          mustIncludeAny: ["rule", "each"],
-          niceToIncludeAny: ["input", "output", "table", "example"]
-        }
-      },
-      "Inference (because… evidence)": {
-        explain: "Inference means you work something out that isn’t directly said, using clues from the text.",
-        example: "Text: ‘He put on his coat and grabbed an umbrella.’ Inference: It’s raining, because he needs an umbrella.",
-        explainBack: {
-          prompt: "Explain inference in your own words and give a quick example.",
-          mustIncludeAny: ["clues", "because"],
-          niceToIncludeAny: ["evidence", "text", "example"]
-        }
-      }
+// ✅ OFFLINE_TUTOR (auto-generated for EVERY topic, with ability to override)
+// You can still add custom hand-written packs later — they will override defaults.
+window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {};
+
+(function buildOfflineTutorFromDATA(){
+  const DATA = window.DATA;
+  if(!DATA) return;
+
+  // Helpers
+  const norm = (s) => String(s||"").trim();
+  const low = (s) => norm(s).toLowerCase();
+
+  // A few kid-friendly micro templates
+  function defaultExplain(topic, tab){
+    const isMath = tab === "maths";
+    if(isMath){
+      return `Let’s learn: ${topic} 💖
+
+Tiny steps:
+1) What is the question asking?
+2) Pick the rule or method.
+3) Do the steps slowly.
+4) Check your answer.`;
+    }
+    return `Let’s learn: ${topic} 💖
+
+Tiny steps:
+1) Read the question twice.
+2) Find the key words.
+3) Answer in a full sentence.
+4) Prove it with evidence (because…).`;
+  }
+
+  function defaultExample(topic, tab){
+    const t = low(topic);
+    const isMath = tab === "maths";
+
+    if(isMath){
+      if(t.includes("place value") || t.includes("million") || t.includes("compare numbers") || t.includes("read, write"))
+        return "Example: In 345, the digit 4 is in the tens place, so it means 40.";
+      if(t.includes("round"))
+        return "Example: Round 3,462 to the nearest 10 → look at the ones (2) → stays the same → 3,460.";
+      if(t.includes("fraction"))
+        return "Example: 3/4 of 20 → split 20 into 4 equal parts (5 each) → take 3 parts → 15.";
+      if(t.includes("decimal"))
+        return "Example: 0.6 is the same as 0.60, so 0.6 is bigger than 0.56.";
+      if(t.includes("percent"))
+        return "Example: 10% of 50 is 5 (because 10% means 1/10).";
+      if(t.includes("ratio"))
+        return "Example: 4:6 simplifies to 2:3 (divide both sides by 2).";
+      if(t.includes("perimeter"))
+        return "Example: Perimeter of 5 by 3 rectangle → 5+3+5+3 = 16.";
+      if(t.includes("area"))
+        return "Example: Area of 5 by 3 rectangle → 5 × 3 = 15.";
+      if(t.includes("mean"))
+        return "Example: Mean of 2, 4, 6 → total 12 ÷ 3 = 4.";
+      if(t.includes("negative"))
+        return "Example: -3 is smaller than 2 because it is left of 0 on a number line.";
+      return "Example: Work step-by-step. Write your working clearly, then check it.";
+    }
+
+    // English
+    if(t.includes("inference"))
+      return "Example: ‘He grabbed an umbrella.’ → I infer it is raining, because umbrellas are used in rain.";
+    if(t.includes("summar"))
+      return "Example summary: ‘The character felt nervous and tried to stay calm.’ (Only the main idea, no tiny details.)";
+    if(t.includes("comma"))
+      return "Example: After the storm, we went outside. (comma after a fronted adverbial)";
+    if(t.includes("apostroph"))
+      return "Example: don’t (missing letters) / the girl’s coat (belonging).";
+    if(t.includes("speech") || t.includes("inverted"))
+      return "Example: “I’m ready,” said Micaela.";
+
+    return "Example: Answer in a full sentence and use evidence from the text.";
+  }
+
+  function defaultQuiz(topic){
+    const t = low(topic);
+
+    // Topic-based quizzes with fixed answers (so verification can work offline)
+    if(t.includes("read, write") || t.includes("compare numbers") || t.includes("place value"))
+      return { q: "Quick check: In 345, what digit is in the tens place?", a: "4" };
+    if(t.includes("round"))
+      return { q: "Quick check: Round 3,462 to the nearest 10.", a: "3460" };
+    if(t.includes("fraction"))
+      return { q: "Quick check: What is 3/4 of 20?", a: "15" };
+    if(t.includes("decimal"))
+      return { q: "Quick check: Which is bigger: 0.6 or 0.56?", a: "0.6" };
+    if(t.includes("percent"))
+      return { q: "Quick check: What is 10% of 50?", a: "5" };
+    if(t.includes("ratio"))
+      return { q: "Quick check: Simplify the ratio 4:6.", a: "2:3" };
+    if(t.includes("perimeter"))
+      return { q: "Quick check: Perimeter of a 5cm by 3cm rectangle?", a: "16" };
+    if(t.includes("area"))
+      return { q: "Quick check: Area of a 5cm by 3cm rectangle?", a: "15" };
+    if(t.includes("mean"))
+      return { q: "Quick check: Mean of 2, 4, 6?", a: "4" };
+    if(t.includes("negative"))
+      return { q: "Quick check: Which is smaller: -3 or 2?", a: "-3" };
+
+    // Safe fallback quiz (not topic-specific but keeps offline verification usable)
+    return { q: "Quick check: What is 7 + 8?", a: "15" };
+  }
+
+  function defaultExplainBack(topic){
+    const t = low(topic);
+    const must = ["because"];
+    const nice = ["example", "evidence", "text", "rule", "key"];
+
+    // Make inference extra-evidence focused
+    if(t.includes("inference")){
+      must.push("clues");
+    }
+
+    return {
+      prompt: `Explain “${topic}” in your own words.
+✅ Use at least 2 key ideas.
+✅ Include a because… and 1 example.`,
+      mustIncludeAny: must,
+      niceToIncludeAny: nice
     };
+  }
+
+  // Build defaults for every DATA item
+  const allItems = [];
+  ["maths","english"].forEach(tab => {
+    (DATA[tab] || []).forEach(sec => {
+      (sec.items || []).forEach(it => {
+        allItems.push({ tab, topic: norm(it.topic) });
+      });
+    });
+  });
+
+  allItems.forEach(({ tab, topic }) => {
+    if(!topic) return;
+
+    // If a custom pack already exists, keep it (custom overrides defaults)
+    if(window.OFFLINE_TUTOR[topic]) return;
+
+    const pack = {
+      explain: defaultExplain(topic, tab),
+      example: defaultExample(topic, tab),
+      explainBack: defaultExplainBack(topic)
+    };
+
+    // Maths uses quiz for verification
+    if(tab === "maths") pack.quiz = defaultQuiz(topic);
+
+    window.OFFLINE_TUTOR[topic] = pack;
+  });
+})();
   </script>
 
   <!-- =========================
@@ -1553,7 +1684,7 @@ Learner says: ${userText}`;
         if(chatInput) chatInput.value = "";
 
         // If user asked for a visual, show it instantly (no waiting) ✅
-        if(/(show visual|visual|diagram|draw|picture)/i.test(msg)){
+        if(/\b(show visual|visual|diagram|draw|picture)\b/i.test(msg)){
 
           if(!ensureTopicSelected()) return;
           botSay("Okay 💖 Here’s a visual to help your brain see it!");
