@@ -538,7 +538,7 @@
       <div class="topline">
         <div class="brand">
           <h1>✨ Micaela’s KS2 Power Checklist ✨</h1>
-          <p>Money unlocks only after Tutor checks understanding + Confidence 😄 (Maths = Quiz, English = Explain-back) 💖 <span style="font-weight:900;opacity:.75;">• Build: <span id="buildTag">2026-01-19-01</span></span></p>
+          <p>Money unlocks only after Tutor checks understanding + Confidence 😄 (Maths = Quiz, English = Explain-back) 💖</p>
         </div>
 
         <div class="pillrow">
@@ -828,158 +828,27 @@
   ]
 };
 
-// ✅ OFFLINE_TUTOR (auto-generated for EVERY topic, with ability to override)
-// You can still add custom hand-written packs later — they will override defaults.
-window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {};
-
-(function buildOfflineTutorFromDATA(){
-  const DATA = window.DATA;
-  if(!DATA) return;
-
-  // Helpers
-  const norm = (s) => String(s||"").trim();
-  const low = (s) => norm(s).toLowerCase();
-
-  // A few kid-friendly micro templates
-  function defaultExplain(topic, tab){
-    const isMath = tab === "maths";
-    if(isMath){
-      return `Let’s learn: ${topic} 💖
-
-Tiny steps:
-1) What is the question asking?
-2) Pick the rule or method.
-3) Do the steps slowly.
-4) Check your answer.`;
-    }
-    return `Let’s learn: ${topic} 💖
-
-Tiny steps:
-1) Read the question twice.
-2) Find the key words.
-3) Answer in a full sentence.
-4) Prove it with evidence (because…).`;
-  }
-
-  function defaultExample(topic, tab){
-    const t = low(topic);
-    const isMath = tab === "maths";
-
-    if(isMath){
-      if(t.includes("place value") || t.includes("million") || t.includes("compare numbers") || t.includes("read, write"))
-        return "Example: In 345, the digit 4 is in the tens place, so it means 40.";
-      if(t.includes("round"))
-        return "Example: Round 3,462 to the nearest 10 → look at the ones (2) → stays the same → 3,460.";
-      if(t.includes("fraction"))
-        return "Example: 3/4 of 20 → split 20 into 4 equal parts (5 each) → take 3 parts → 15.";
-      if(t.includes("decimal"))
-        return "Example: 0.6 is the same as 0.60, so 0.6 is bigger than 0.56.";
-      if(t.includes("percent"))
-        return "Example: 10% of 50 is 5 (because 10% means 1/10).";
-      if(t.includes("ratio"))
-        return "Example: 4:6 simplifies to 2:3 (divide both sides by 2).";
-      if(t.includes("perimeter"))
-        return "Example: Perimeter of 5 by 3 rectangle → 5+3+5+3 = 16.";
-      if(t.includes("area"))
-        return "Example: Area of 5 by 3 rectangle → 5 × 3 = 15.";
-      if(t.includes("mean"))
-        return "Example: Mean of 2, 4, 6 → total 12 ÷ 3 = 4.";
-      if(t.includes("negative"))
-        return "Example: -3 is smaller than 2 because it is left of 0 on a number line.";
-      return "Example: Work step-by-step. Write your working clearly, then check it.";
-    }
-
-    // English
-    if(t.includes("inference"))
-      return "Example: ‘He grabbed an umbrella.’ → I infer it is raining, because umbrellas are used in rain.";
-    if(t.includes("summar"))
-      return "Example summary: ‘The character felt nervous and tried to stay calm.’ (Only the main idea, no tiny details.)";
-    if(t.includes("comma"))
-      return "Example: After the storm, we went outside. (comma after a fronted adverbial)";
-    if(t.includes("apostroph"))
-      return "Example: don’t (missing letters) / the girl’s coat (belonging).";
-    if(t.includes("speech") || t.includes("inverted"))
-      return "Example: “I’m ready,” said Micaela.";
-
-    return "Example: Answer in a full sentence and use evidence from the text.";
-  }
-
-  function defaultQuiz(topic){
-    const t = low(topic);
-
-    // Topic-based quizzes with fixed answers (so verification can work offline)
-    if(t.includes("read, write") || t.includes("compare numbers") || t.includes("place value"))
-      return { q: "Quick check: In 345, what digit is in the tens place?", a: "4" };
-    if(t.includes("round"))
-      return { q: "Quick check: Round 3,462 to the nearest 10.", a: "3460" };
-    if(t.includes("fraction"))
-      return { q: "Quick check: What is 3/4 of 20?", a: "15" };
-    if(t.includes("decimal"))
-      return { q: "Quick check: Which is bigger: 0.6 or 0.56?", a: "0.6" };
-    if(t.includes("percent"))
-      return { q: "Quick check: What is 10% of 50?", a: "5" };
-    if(t.includes("ratio"))
-      return { q: "Quick check: Simplify the ratio 4:6.", a: "2:3" };
-    if(t.includes("perimeter"))
-      return { q: "Quick check: Perimeter of a 5cm by 3cm rectangle?", a: "16" };
-    if(t.includes("area"))
-      return { q: "Quick check: Area of a 5cm by 3cm rectangle?", a: "15" };
-    if(t.includes("mean"))
-      return { q: "Quick check: Mean of 2, 4, 6?", a: "4" };
-    if(t.includes("negative"))
-      return { q: "Quick check: Which is smaller: -3 or 2?", a: "-3" };
-
-    // Safe fallback quiz (not topic-specific but keeps offline verification usable)
-    return { q: "Quick check: What is 7 + 8?", a: "15" };
-  }
-
-  function defaultExplainBack(topic){
-    const t = low(topic);
-    const must = ["because"];
-    const nice = ["example", "evidence", "text", "rule", "key"];
-
-    // Make inference extra-evidence focused
-    if(t.includes("inference")){
-      must.push("clues");
-    }
-
-    return {
-      prompt: `Explain “${topic}” in your own words.
-✅ Use at least 2 key ideas.
-✅ Include a because… and 1 example.`,
-      mustIncludeAny: must,
-      niceToIncludeAny: nice
+window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
+      "Counting in multiples (input/output tables)": {
+        explain: "We follow a rule each time. Example rule: +7 means add 7 each step.",
+        example: "Rule is +7. If input is 9, output is 16.",
+        quiz: { q: "Rule is +7. If input is 9, what is output?", a: "16" },
+        explainBack: {
+          prompt: "Explain what an input/output table is and how you use the rule.",
+          mustIncludeAny: ["rule", "each"],
+          niceToIncludeAny: ["input", "output", "table", "example"]
+        }
+      },
+      "Inference (because… evidence)": {
+        explain: "Inference means you work something out that isn’t directly said, using clues from the text.",
+        example: "Text: ‘He put on his coat and grabbed an umbrella.’ Inference: It’s raining, because he needs an umbrella.",
+        explainBack: {
+          prompt: "Explain inference in your own words and give a quick example.",
+          mustIncludeAny: ["clues", "because"],
+          niceToIncludeAny: ["evidence", "text", "example"]
+        }
+      }
     };
-  }
-
-  // Build defaults for every DATA item
-  const allItems = [];
-  ["maths","english"].forEach(tab => {
-    (DATA[tab] || []).forEach(sec => {
-      (sec.items || []).forEach(it => {
-        allItems.push({ tab, topic: norm(it.topic) });
-      });
-    });
-  });
-
-  allItems.forEach(({ tab, topic }) => {
-    if(!topic) return;
-
-    // If a custom pack already exists, keep it (custom overrides defaults)
-    if(window.OFFLINE_TUTOR[topic]) return;
-
-    const pack = {
-      explain: defaultExplain(topic, tab),
-      example: defaultExample(topic, tab),
-      explainBack: defaultExplainBack(topic)
-    };
-
-    // Maths uses quiz for verification
-    if(tab === "maths") pack.quiz = defaultQuiz(topic);
-
-    window.OFFLINE_TUTOR[topic] = pack;
-  });
-})();
   </script>
 
   <!-- =========================
@@ -1160,9 +1029,6 @@ Tiny steps:
 
       // ---- AI backend (Cloudflare Worker) ----
       // If you ever change your Worker name, update these two URLs.
-      const APP_BUILD = "2026-01-19-01"; // bump this to confirm GitHub Pages deployed the latest file
-      console.log("✅ MicaelaStudyBuddy build:", APP_BUILD);
-
       const AI_BACKEND_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/api/chat";
       const AI_HEALTH_URL = "https://ai-study-coach-backend.tmanyepa.workers.dev/health";
       const AI_MAX_HISTORY = 10; // keep it small to reduce token usage
@@ -1176,8 +1042,7 @@ Tiny steps:
       }
 
       function nowISO(){
-        // Simple + safe (avoids rare parsing issues on some minifiers)
-        return new Date().toISOString();
+        try { return new Date().toISOString(); } catch { return ""; }
       }
 
       function buildAiMessage(userText){
@@ -1276,9 +1141,7 @@ Learner says: ${userText}`;
         passMode = next;
         if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
         if(passMode === "supportive"){
-          botSay(`A Mode ✅
-I will be kind and accept "close enough" if your understanding is clear 💖
-I may ask you to add a quick example.`);
+          botSay("A Mode ✅\nI will be kind and accept \"close enough\" if your understanding is clear 💖\nI may ask you to add a quick example.");
         }
       }
 
@@ -1312,7 +1175,7 @@ I may ask you to add a quick example.`);
         const low = text.toLowerCase();
 
         const hasReason = /\bbecause\b|\bso\b|\bthis shows\b|\bthat means\b|\bso that\b|\btherefore\b/.test(low);
-        const hasExample = /\bfor example\b|\beg\b|\be\.g\.\b|\blike\b|\bfor instance\b|"/.test(low);
+        const hasExample = /\bfor example\b|\beg\b|\be\.g\.\b|\blike\b|\bfor instance\b|\"/.test(low);
         const longEnough = text.length >= 28;
 
         const mustAny = (expected?.mustIncludeAny || []).map(s => String(s).toLowerCase());
@@ -1376,180 +1239,6 @@ I may ask you to add a quick example.`);
           <div style="display:grid; gap:8px;">
             ${steps.map((s,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:900;">${i+1}. ${s}</div>`).join("")}
           </div>`;
-      }
-
-      // ============================
-      // Visual helpers (make explanations less boring 🥰)
-      // ============================
-      function escapeHTML(str){
-        return String(str || "").replace(/[&<>"']/g, (c)=>({
-          "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-        }[c]));
-      }
-
-      function pill(txt){
-        return `<span style="display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:950;font-size:12px;">${escapeHTML(txt)}</span>`;
-      }
-
-      function visualCard(title, inner){
-        return `
-          <div style="display:grid; gap:10px;">
-            <div style="font-weight:950;">${escapeHTML(title)}</div>
-            <div style="padding:10px 12px;border-radius:16px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.88);">
-              ${inner}
-            </div>
-          </div>`;
-      }
-
-      function placeValueVisual(n){
-        const s = String((n===undefined || n===null) ? 345 : n);
-        const digits = s.split("").map(d=>escapeHTML(d));
-        const labels = ["Millions","Hundred-thousands","Ten-thousands","Thousands","Hundreds","Tens","Ones"];
-
-        // pad to 7 columns
-        const padded = Array(7).fill("");
-        for(let i=0;i<Math.min(7,digits.length);i++){
-          padded[7 - Math.min(7,digits.length) + i] = digits[digits.length - Math.min(7,digits.length) + i];
-        }
-        const cols = labels;
-
-        const head = '<tr>' + cols.map(c => (
-          '<th style="padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);">' + escapeHTML(c) + '</th>'
-        )).join("") + '</tr>';
-
-        const row = '<tr>' + padded.map(d => (
-          '<td style="text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;">' + (d || '&nbsp;') + '</td>'
-        )).join("") + '</tr>';
-
-        return visualCard('Place Value Chart',
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
-            + pill('Example number: ' + s)
-            + pill('Read it by place')
-          + '</div>'
-          + '<table style="width:100%;border-collapse:collapse;border:1px solid rgba(26,18,48,.10);border-radius:14px;overflow:hidden;">'
-            + head + row
-          + '</table>'
-          + '<div style="margin-top:8px;font-size:12px;opacity:.9;line-height:1.35;">'
-            + 'Tip: Start on the left. Say the <b>place</b> name, then the <b>digit</b>.'
-          + '</div>'
-        );
-      }
-
-      function numberLineVisual(a=0,b=10,mark=6){
-        const min = Math.min(a,b), max = Math.max(a,b);
-        const width = 280;
-        const x = (mark-min)/(max-min) * width;
-        return visualCard("Number Line", `
-          <svg viewBox="0 0 320 80" width="100%" height="80" aria-label="number line">
-            <line x1="20" y1="40" x2="300" y2="40" stroke="rgba(26,18,48,.45)" stroke-width="4" stroke-linecap="round"/>
-            <line x1="20" y1="32" x2="20" y2="48" stroke="rgba(26,18,48,.65)" stroke-width="3"/>
-            <line x1="300" y1="32" x2="300" y2="48" stroke="rgba(26,18,48,.65)" stroke-width="3"/>
-            <text x="20" y="68" font-size="14" font-weight="800" fill="rgba(26,18,48,.9)">${escapeHTML(min)}</text>
-            <text x="300" y="68" font-size="14" font-weight="800" text-anchor="end" fill="rgba(26,18,48,.9)">${escapeHTML(max)}</text>
-            <circle cx="${20 + x}" cy="40" r="9" fill="rgba(255,79,216,.55)" stroke="rgba(26,18,48,.18)" stroke-width="2"/>
-            <text x="${20 + x}" y="22" font-size="13" font-weight="950" text-anchor="middle" fill="rgba(26,18,48,.9)">${escapeHTML(mark)}</text>
-          </svg>
-          <div style="font-size:12px;opacity:.9;line-height:1.35;">Find the mark by counting steps along the line.</div>
-        `);
-      }
-
-      function fractionBarVisual(n=3,d=4){
-        const parts = Math.max(2, Math.min(12, d));
-        const filled = Math.max(0, Math.min(parts, n));
-        return visualCard("Fraction Bar", `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-            ${pill(`${n}/${d}`)}
-            ${pill("Top = parts shaded")}
-            ${pill("Bottom = total parts")}
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(${parts},1fr);gap:6px;">
-            ${Array.from({length:parts}).map((_,i)=>{
-              const on = i < filled;
-              return `<div style="height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${on?"rgba(123,97,255,.28)":"rgba(255,255,255,.92)"};"></div>`;
-            }).join("")}
-          </div>
-        `);
-      }
-
-      function inferenceTCVisual(){
-        return visualCard("Inference T-Chart", `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div style="padding:10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.92);">
-              <div style="font-weight:950;margin-bottom:6px;">Clues / Evidence</div>
-              <ul style="margin:0;padding-left:18px;line-height:1.35;font-weight:800;opacity:.95;">
-                <li>What does the text <b>say</b>?</li>
-                <li>Which words give a hint?</li>
-              </ul>
-            </div>
-            <div style="padding:10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.92);">
-              <div style="font-weight:950;margin-bottom:6px;">Inference</div>
-              <div style="font-weight:900;opacity:.95;">I think… <b>because</b>…</div>
-              <div style="margin-top:6px;font-size:12px;opacity:.9;">(Use evidence to prove your idea.)</div>
-            </div>
-          </div>
-        `);
-      }
-
-      function autoVisualForTopic(topicText, subject){
-        const t = String(topicText || "").toLowerCase();
-        const s = String(subject || "").toLowerCase();
-
-        // Maths visuals
-        if(s.includes("math")){
-          if(t.includes("place value") || t.includes("million") || t.includes("compare numbers") || t.includes("read, write")) return placeValueVisual(345);
-          if(t.includes("fraction")) return fractionBarVisual(3,4);
-          if(t.includes("decimal")) return numberLineVisual(0, 1, 0.6);
-          if(t.includes("negative")) return numberLineVisual(-10, 10, -3);
-          if(t.includes("round")) return visualCard("Rounding Ladder", `
-            <div style="display:grid;gap:8px;">
-              ${["Underline the rounding digit","Look at the next digit","5–9 round UP, 0–4 stay","Replace digits after with 0"].map((x,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.90);font-weight:900;">${i+1}. ${escapeHTML(x)}</div>`).join("")}
-            </div>
-          `);
-          if(t.includes("ratio")) return visualCard("Ratio Bar Model", `
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">${pill("Example 2 : 3")}${pill("Split into 5 equal parts")}</div>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
-              ${[1,1,0,0,0].map(v=>`<div style="height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${v?"rgba(255,79,216,.22)":"rgba(123,97,255,.18)"};"></div>`).join("")}
-            </div>
-            <div style="margin-top:8px;font-size:12px;opacity:.9;">First colour = 2 parts, second colour = 3 parts.</div>
-          `);
-        }
-
-        // English visuals
-        if(s.includes("english")){
-          if(t.includes("inference")) return inferenceTCVisual();
-          if(t.includes("summar")) return visualCard("Summary Recipe", `
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${pill("Who/What?")}${pill("What happened?")}${pill("Main idea")}${pill("No tiny details")}</div>
-            <div style="font-size:12px;opacity:.9;line-height:1.35;">Write 1–2 sentences using only the biggest ideas.</div>
-          `);
-          if(t.includes("punct") || t.includes("comma") || t.includes("apostroph")) return visualCard("Punctuation Quick Guide", `
-            <div style="display:grid;gap:8px;">
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Comma ,")}${pill("Pause / list / clarity")}</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Apostrophe ’")}${pill("Missing letters / belonging")}</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Speech “ ”")}${pill("Words someone said")}</div>
-            </div>
-          `);
-        }
-
-        // Default (nice universal visual)
-        return visualCard("Learning Map", simpleStepsVisual(["What is it?","Key rule","Try 1 example","Quick check"]));
-      }
-
-      let justShowedVisual = false;
-
-      function maybeAutoVisual(){
-        if(!currentTopic) return;
-        // Only show an auto-visual if the user is learning (not during verification)
-        if(tutorExpectedType) return;
-        // If we already showed a visual for this button-click, don’t spam a second one.
-        if(justShowedVisual){ justShowedVisual = false; return; }
-        renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
-      }
-
-      function showVisualNow(){
-        if(!ensureTopicSelected()) return false;
-        justShowedVisual = true;
-        renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
-        return true;
       }
 
       let tutorExpected = null;
@@ -1698,16 +1387,6 @@ I may ask you to add a quick example.`);
         userSay(msg);
         if(chatInput) chatInput.value = "";
 
-        // If user asked for a visual, show it instantly (no waiting) ✅
-        if(/\b(show visual|visual|diagram|draw|picture)\b/i.test(msg)){
-
-          if(!ensureTopicSelected()) return;
-          botSay("Okay 💖 Here’s a visual to help your brain see it!");
-          renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
-          botSay("Quick check: Can you tell me what you notice in the visual?");
-          return;
-        }
-
         // If we are currently expecting a local quiz/explain-back answer, keep it OFFLINE so we can mark verified.
         if(tutorExpectedType){
           handleOffline(msg);
@@ -1724,33 +1403,23 @@ I may ask you to add a quick example.`);
           setBusy(true);
           const aiReply = await sendToAI(msg);
           botSay(aiReply);
-          // Add an auto-visual after AI explains (makes it less boring)
-          maybeAutoVisual();
           setBusy(false);
           updateTutorStatus();
         }catch(e){
           setBusy(false);
           aiOnline = false;
           updateTutorStatus();
-          botSay("🔵 I can't reach AI right now, so I'm switching to Offline Tutor.
-(You can keep learning - it still works!)");
+          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
+(You can keep learning — it still works!)");
           console.warn("AI fallback:", e);
           handleOffline(msg);
         }
       }
 
       // Wire tutor UI
-      function runQuickAction(kind){
-        // Option B ✅: auto-show a visual for Explain / Example / Quiz clicks
-        if(["explain","example","quiz"].includes(kind)){
-          showVisualNow();
-        }
-        sendChat(kind);
-      }
-
-      on(qExplain, "click", () => runQuickAction("explain"));
-      on(qExample, "click", () => runQuickAction("example"));
-      on(qQuiz, "click", () => runQuickAction("quiz"));
+      on(qExplain, "click", () => sendChat("explain"));
+      on(qExample, "click", () => sendChat("example"));
+      on(qQuiz, "click", () => sendChat("quiz"));
       on(qExplainBack, "click", () => sendChat("explain-back"));
       on(qVisual, "click", () => sendChat("show visual"));
 
@@ -1996,7 +1665,7 @@ I may ask you to add a quick example.`);
             render();
             alert("Imported! 🎉");
           }catch(e){
-            alert("Sorry - that file didn't look like a valid export.");
+            alert("Sorry — that file didn’t look like a valid export.");
           }
         };
         input.click();
