@@ -546,7 +546,7 @@
             <div>💰</div>
             <div>
               <div class="tiny">Maths earned (this month)</div>
-              <div class="money" id="totalMoney">£0.00 / £25.00<\/div>
+              <div class="money" id="totalMoney">£0.00 / £25.00</div>
             </div>
           </div>
           <div class="pill" title="Topics unlocked (verified + 😄)">
@@ -821,8 +821,9 @@ window.OFFLINE_TUTOR = window.OFFLINE_TUTOR || {
 
       function countMathTopics(){
         try{
-          if(!DATA || !DATA.maths) return 0;
-          return DATA.maths.reduce((sum, sec) => sum + ((sec && sec.items) ? sec.items.length : 0), 0);
+          const d = window.DATA;
+          if(!d || !d.maths) return 0;
+          return d.maths.reduce((sum, sec) => sum + ((sec && sec.items) ? sec.items.length : 0), 0);
         }catch(e){
           return 0;
         }
