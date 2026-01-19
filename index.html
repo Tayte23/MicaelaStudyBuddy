@@ -1272,7 +1272,7 @@ Learner says: ${userText}`;
         passMode = next;
         if(passSupportive) passSupportive.classList.toggle("active", passMode === "supportive");
         if(passMode === "supportive"){
-          botSay("A Mode ✅\nI will be kind and accept \"close enough\" if your understanding is clear 💖\nI may ask you to add a quick example.");
+          botSay("A Mode ✅\nI will be kind and accept "close enough" if your understanding is clear 💖\nI may ask you to add a quick example.");
         }
       }
 
@@ -1306,7 +1306,7 @@ Learner says: ${userText}`;
         const low = text.toLowerCase();
 
         const hasReason = /\bbecause\b|\bso\b|\bthis shows\b|\bthat means\b|\bso that\b|\btherefore\b/.test(low);
-        const hasExample = /\bfor example\b|\beg\b|\be\.g\.\b|\blike\b|\bfor instance\b|\"/.test(low);
+        const hasExample = /\bfor example\b|\beg\b|\be\.g\.\b|\blike\b|\bfor instance\b|"/.test(low);
         const longEnough = text.length >= 28;
 
         const mustAny = (expected?.mustIncludeAny || []).map(s => String(s).toLowerCase());
@@ -1377,7 +1377,7 @@ Learner says: ${userText}`;
       // ============================
       function escapeHTML(str){
         return String(str || "").replace(/[&<>"']/g, (c)=>({
-          "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+          "&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;"
         }[c]));
       }
 
@@ -1403,8 +1403,8 @@ Learner says: ${userText}`;
         for(let i=0;i<digits.length;i++) padded[padded.length-digits.length+i] = digits[i];
         const cols = labels.slice(labels.length - padded.length);
 
-        const head = `<tr>${cols.map(c=>`<th style=\"padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);\">${escapeHTML(c)}</th>`).join("")}</tr>`;
-        const row = `<tr>${padded.map(d=>`<td style=\"text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;\">${d || "&nbsp;"}</td>`).join("")}</tr>`;
+        const head = `<tr>${cols.map(c=>`<th style="padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);">${escapeHTML(c)}</th>`).join("")}</tr>`;
+        const row = `<tr>${padded.map(d=>`<td style="text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;">${d || "&nbsp;"}</td>`).join("")}</tr>`;
 
         return visualCard("Place Value Chart", `
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
@@ -1487,13 +1487,13 @@ Learner says: ${userText}`;
           if(t.includes("negative")) return numberLineVisual(-10, 10, -3);
           if(t.includes("round")) return visualCard("Rounding Ladder", `
             <div style="display:grid;gap:8px;">
-              ${["Underline the rounding digit","Look at the next digit","5–9 round UP, 0–4 stay","Replace digits after with 0"].map((x,i)=>`<div style=\"padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.90);font-weight:900;\">${i+1}. ${escapeHTML(x)}</div>`).join("")}
+              ${["Underline the rounding digit","Look at the next digit","5–9 round UP, 0–4 stay","Replace digits after with 0"].map((x,i)=>`<div style="padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.90);font-weight:900;">${i+1}. ${escapeHTML(x)}</div>`).join("")}
             </div>
           `);
           if(t.includes("ratio")) return visualCard("Ratio Bar Model", `
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">${pill("Example 2 : 3")}${pill("Split into 5 equal parts")}</div>
             <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
-              ${[1,1,0,0,0].map(v=>`<div style=\"height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${v?"rgba(255,79,216,.22)":"rgba(123,97,255,.18)"};\"></div>`).join("")}
+              ${[1,1,0,0,0].map(v=>`<div style="height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${v?"rgba(255,79,216,.22)":"rgba(123,97,255,.18)"};"></div>`).join("")}
             </div>
             <div style="margin-top:8px;font-size:12px;opacity:.9;">First colour = 2 parts, second colour = 3 parts.</div>
           `);
