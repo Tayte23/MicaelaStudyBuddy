@@ -1241,6 +1241,160 @@ Learner says: ${userText}`;
           </div>`;
       }
 
+      // ============================
+      // Visual helpers (make explanations less boring 🥰)
+      // ============================
+      function escapeHTML(str){
+        return String(str || "").replace(/[&<>"']/g, (c)=>({
+          "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+        }[c]));
+      }
+
+      function pill(txt){
+        return `<span style="display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.86);font-weight:950;font-size:12px;">${escapeHTML(txt)}</span>`;
+      }
+
+      function visualCard(title, inner){
+        return `
+          <div style="display:grid; gap:10px;">
+            <div style="font-weight:950;">${escapeHTML(title)}</div>
+            <div style="padding:10px 12px;border-radius:16px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.88);">
+              ${inner}
+            </div>
+          </div>`;
+      }
+
+      function placeValueVisual(n){
+        const s = String(n ?? 345);
+        const digits = s.split("").map(d=>escapeHTML(d));
+        const labels = ["Millions","Hundred-thousands","Ten-thousands","Thousands","Hundreds","Tens","Ones"];
+        const padded = Array(Math.max(7, digits.length)).fill("");
+        for(let i=0;i<digits.length;i++) padded[padded.length-digits.length+i] = digits[i];
+        const cols = labels.slice(labels.length - padded.length);
+
+        const head = `<tr>${cols.map(c=>`<th style=\"padding:6px 8px;font-size:11px;opacity:.9;border-bottom:1px solid rgba(26,18,48,.10);\">${escapeHTML(c)}</th>`).join("")}</tr>`;
+        const row = `<tr>${padded.map(d=>`<td style=\"text-align:center;padding:10px 8px;font-weight:1000;font-size:16px;\">${d || "&nbsp;"}</td>`).join("")}</tr>`;
+
+        return visualCard("Place Value Chart", `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+            ${pill(`Example number: ${s}`)}
+            ${pill("Read it by place")}
+          </div>
+          <table style="width:100%;border-collapse:collapse;border:1px solid rgba(26,18,48,.10);border-radius:14px;overflow:hidden;">
+            ${head}${row}
+          </table>
+          <div style="margin-top:8px;font-size:12px;opacity:.9;line-height:1.35;">
+            Tip: Start on the left. Say the <b>place</b> name, then the <b>digit</b>.
+          </div>
+        `);
+      }
+
+      function numberLineVisual(a=0,b=10,mark=6){
+        const min = Math.min(a,b), max = Math.max(a,b);
+        const width = 280;
+        const x = (mark-min)/(max-min) * width;
+        return visualCard("Number Line", `
+          <svg viewBox="0 0 320 80" width="100%" height="80" aria-label="number line">
+            <line x1="20" y1="40" x2="300" y2="40" stroke="rgba(26,18,48,.45)" stroke-width="4" stroke-linecap="round"/>
+            <line x1="20" y1="32" x2="20" y2="48" stroke="rgba(26,18,48,.65)" stroke-width="3"/>
+            <line x1="300" y1="32" x2="300" y2="48" stroke="rgba(26,18,48,.65)" stroke-width="3"/>
+            <text x="20" y="68" font-size="14" font-weight="800" fill="rgba(26,18,48,.9)">${escapeHTML(min)}</text>
+            <text x="300" y="68" font-size="14" font-weight="800" text-anchor="end" fill="rgba(26,18,48,.9)">${escapeHTML(max)}</text>
+            <circle cx="${20 + x}" cy="40" r="9" fill="rgba(255,79,216,.55)" stroke="rgba(26,18,48,.18)" stroke-width="2"/>
+            <text x="${20 + x}" y="22" font-size="13" font-weight="950" text-anchor="middle" fill="rgba(26,18,48,.9)">${escapeHTML(mark)}</text>
+          </svg>
+          <div style="font-size:12px;opacity:.9;line-height:1.35;">Find the mark by counting steps along the line.</div>
+        `);
+      }
+
+      function fractionBarVisual(n=3,d=4){
+        const parts = Math.max(2, Math.min(12, d));
+        const filled = Math.max(0, Math.min(parts, n));
+        return visualCard("Fraction Bar", `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+            ${pill(`${n}/${d}`)}
+            ${pill("Top = parts shaded")}
+            ${pill("Bottom = total parts")}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(${parts},1fr);gap:6px;">
+            ${Array.from({length:parts}).map((_,i)=>{
+              const on = i < filled;
+              return `<div style="height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${on?"rgba(123,97,255,.28)":"rgba(255,255,255,.92)"};"></div>`;
+            }).join("")}
+          </div>
+        `);
+      }
+
+      function inferenceTCVisual(){
+        return visualCard("Inference T-Chart", `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="padding:10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.92);">
+              <div style="font-weight:950;margin-bottom:6px;">Clues / Evidence</div>
+              <ul style="margin:0;padding-left:18px;line-height:1.35;font-weight:800;opacity:.95;">
+                <li>What does the text <b>say</b>?</li>
+                <li>Which words give a hint?</li>
+              </ul>
+            </div>
+            <div style="padding:10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.92);">
+              <div style="font-weight:950;margin-bottom:6px;">Inference</div>
+              <div style="font-weight:900;opacity:.95;">I think… <b>because</b>…</div>
+              <div style="margin-top:6px;font-size:12px;opacity:.9;">(Use evidence to prove your idea.)</div>
+            </div>
+          </div>
+        `);
+      }
+
+      function autoVisualForTopic(topicText, subject){
+        const t = String(topicText || "").toLowerCase();
+        const s = String(subject || "").toLowerCase();
+
+        // Maths visuals
+        if(s.includes("math")){
+          if(t.includes("place value") || t.includes("million") || t.includes("compare numbers") || t.includes("read, write")) return placeValueVisual(345);
+          if(t.includes("fraction")) return fractionBarVisual(3,4);
+          if(t.includes("decimal")) return numberLineVisual(0, 1, 0.6);
+          if(t.includes("negative")) return numberLineVisual(-10, 10, -3);
+          if(t.includes("round")) return visualCard("Rounding Ladder", `
+            <div style="display:grid;gap:8px;">
+              ${["Underline the rounding digit","Look at the next digit","5–9 round UP, 0–4 stay","Replace digits after with 0"].map((x,i)=>`<div style=\"padding:8px 10px;border-radius:14px;border:1px solid rgba(26,18,48,.10);background:rgba(255,255,255,.90);font-weight:900;\">${i+1}. ${escapeHTML(x)}</div>`).join("")}
+            </div>
+          `);
+          if(t.includes("ratio")) return visualCard("Ratio Bar Model", `
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">${pill("Example 2 : 3")}${pill("Split into 5 equal parts")}</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+              ${[1,1,0,0,0].map(v=>`<div style=\"height:22px;border-radius:8px;border:1px solid rgba(26,18,48,.12);background:${v?"rgba(255,79,216,.22)":"rgba(123,97,255,.18)"};\"></div>`).join("")}
+            </div>
+            <div style="margin-top:8px;font-size:12px;opacity:.9;">First colour = 2 parts, second colour = 3 parts.</div>
+          `);
+        }
+
+        // English visuals
+        if(s.includes("english")){
+          if(t.includes("inference")) return inferenceTCVisual();
+          if(t.includes("summar")) return visualCard("Summary Recipe", `
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${pill("Who/What?")}${pill("What happened?")}${pill("Main idea")}${pill("No tiny details")}</div>
+            <div style="font-size:12px;opacity:.9;line-height:1.35;">Write 1–2 sentences using only the biggest ideas.</div>
+          `);
+          if(t.includes("punct") || t.includes("comma") || t.includes("apostroph")) return visualCard("Punctuation Quick Guide", `
+            <div style="display:grid;gap:8px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Comma ,")}${pill("Pause / list / clarity")}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Apostrophe ’")}${pill("Missing letters / belonging")}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">${pill("Speech “ ”")}${pill("Words someone said")}</div>
+            </div>
+          `);
+        }
+
+        // Default (nice universal visual)
+        return visualCard("Learning Map", simpleStepsVisual(["What is it?","Key rule","Try 1 example","Quick check"]));
+      }
+
+      function maybeAutoVisual(){
+        if(!currentTopic) return;
+        // Only show an auto-visual if the user is learning (not during verification)
+        if(tutorExpectedType) return;
+        renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
+      }
+
       let tutorExpected = null;
       let tutorExpectedType = null; // quiz | explainBack
 
@@ -1387,6 +1541,15 @@ Learner says: ${userText}`;
         userSay(msg);
         if(chatInput) chatInput.value = "";
 
+        // If user asked for a visual, show it instantly (no waiting) ✅
+        if(/(show visual|visual|diagram|draw|picture)/i.test(msg)){
+          if(!ensureTopicSelected()) return;
+          botSay("Okay 💖 Here’s a visual to help your brain see it!");
+          renderVisual(() => autoVisualForTopic(currentTopic.topic, activeTab));
+          botSay("Quick check: Can you tell me what you notice in the visual?");
+          return;
+        }
+
         // If we are currently expecting a local quiz/explain-back answer, keep it OFFLINE so we can mark verified.
         if(tutorExpectedType){
           handleOffline(msg);
@@ -1403,6 +1566,20 @@ Learner says: ${userText}`;
           setBusy(true);
           const aiReply = await sendToAI(msg);
           botSay(aiReply);
+          // Add an auto-visual after AI explains (makes it less boring)
+          maybeAutoVisual();
+          setBusy(false);
+          updateTutorStatus();
+        }catch(e){
+          setBusy(false);
+          aiOnline = false;
+          updateTutorStatus();
+          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
+(You can keep learning — it still works!)");
+          console.warn("AI fallback:", e);
+          handleOffline(msg);
+        }
+      }
           setBusy(false);
           updateTutorStatus();
         }catch(e){
