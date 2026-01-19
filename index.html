@@ -1398,8 +1398,8 @@ Learner says: ${userText}`;
           setBusy(false);
           aiOnline = false;
           updateTutorStatus();
-          botSay("🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
-(You can keep learning — it still works!)");
+          botSay(`🔵 I can’t reach AI right now, so I’m switching to Offline Tutor.
+(You can keep learning — it still works!)`);
           console.warn("AI fallback:", e);
           handleOffline(msg);
         }
